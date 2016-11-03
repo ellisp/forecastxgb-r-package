@@ -1,7 +1,9 @@
 # forecastxgb-r-package
 An R package for time series models and forecasts with xgboost compatible with {forecast} S3 classes
 
-Only on GitHub.  Incomplete.  
+Only on GitHub.  Very early days, incomplete.  So far only works with seasonal univariate continuous time series.  Planned addition is support for `xreg` and for non-seasonal data.
+
+This implementation uses as features lagged values of the target variable, linear time, and dummy variables for seasons.
 
 
 ```r
@@ -21,7 +23,7 @@ model <- xgbts(AirPassengers)
 ```
 
 ```
-## Stopping. Best iteration: 81
+## Stopping. Best iteration: 40
 ```
 
 ```
@@ -34,10 +36,10 @@ accuracy(fc)
 ```
 
 ```
-##                         ME        RMSE         MAE           MPE
-## Training set -5.340576e-06 0.002635422 0.001948547 -1.488528e-05
-##                      MAPE        MASE       ACF1
-## Training set 0.0007087885 6.08345e-05 -0.2517086
+##                      ME      RMSE       MAE         MPE      MAPE
+## Training set 0.01076215 0.2486154 0.1879821 0.000896467 0.0685559
+##                     MASE       ACF1
+## Training set 0.005868881 -0.1446392
 ```
 
 ```r
@@ -70,7 +72,7 @@ model <- xgbts(x)
 ```
 
 ```
-## Stopping. Best iteration: 16
+## Stopping. Best iteration: 21
 ```
 
 ```
@@ -90,11 +92,11 @@ accuracy(fc, thedata$xx)
 ```
 
 ```
-##                     ME      RMSE       MAE      MPE     MAPE      MASE
-## Training set  16.44529  40.36934  26.58402 0.492309 1.057617 0.1398889
-## Test set     262.53091 393.97171 305.39539 7.215540 9.214990 1.6070336
-##                    ACF1 Theil's U
-## Training set 0.05805567        NA
-## Test set     0.08914576 0.4090183
+##                      ME      RMSE       MAE        MPE      MAPE
+## Training set   4.244689  20.11645  14.28426 0.09989322 0.6468516
+## Test set     241.150926 378.42260 286.04720 6.56172156 8.6439682
+##                    MASE       ACF1 Theil's U
+## Training set 0.07516579 -0.0595232        NA
+## Test set     1.50522066  0.1084859 0.3993886
 ```
 

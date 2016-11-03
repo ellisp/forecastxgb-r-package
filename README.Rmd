@@ -1,7 +1,9 @@
 # forecastxgb-r-package
 An R package for time series models and forecasts with xgboost compatible with {forecast} S3 classes
 
-Only on GitHub.  Incomplete.  
+Only on GitHub.  Very early days, incomplete.  So far only works with seasonal univariate continuous time series.  Planned addition is support for `xreg` and for non-seasonal data.
+
+This implementation uses as features lagged values of the target variable, linear time, and dummy variables for seasons.
 
 ```{r eval = FALSE}
 devtools::install_github("ellisp/forecastxgb-r-package/pkg")
