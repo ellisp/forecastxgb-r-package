@@ -6,6 +6,7 @@
 #' @export
 #' @import xgboost
 #' @import forecast
+#' @import stats
 #' @param nrounds Maximum number of iterations in cross validation to determine
 #' @param nfold Number of equal size subsamples during cross validation
 #' @return An object of class \code{xgbts}
@@ -19,8 +20,8 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verb
   # check xreg, if it exists, is a numeric matrix
   
   
-
-  if(maxlag < frequency(y)){
+  f <- stats::frequency(y)
+  if(maxlag < f){
     stop("Must have at least one full period of lags.")
   }
   
@@ -40,7 +41,7 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verb
                early.stop.round = 5, maximize = FALSE, verbose = verbose)
   best <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
   
-  model <- xgboost(data = x, label = y2, nround = best, verbose = verbose, ...)
+  model <- xgboost(data = x, label = y2, nrounds = best, verbose = verbose, ...)
   
   output <- list(
     y = origy,
