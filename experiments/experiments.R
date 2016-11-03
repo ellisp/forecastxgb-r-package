@@ -2,7 +2,7 @@ library(forecastxg)
 
 fc1 <- forecast(AirPassengers)
 
-object <- xgbts(AirPassengers)
+object <- xgbts(AirPassengers, maxlag = 12)
 fc2 <- forecast.xgbts(object)
 
 fc1$mean

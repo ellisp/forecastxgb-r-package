@@ -1,5 +1,3 @@
-# TODO - add time as a feature
-
 
 #' xgboost time series modelling
 #' 
@@ -16,22 +14,24 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verb
   
   
   # check xreg, if it exists, is a numeric matrix
+  
+  
 
   if(maxlag < frequency(y)){
     stop("Must have at least one full period of lags.")
   }
   
-  # perhaps turn this lag sequence into a non-exported function
   orign <- length(y)
   origy <- y
   n <- orign - maxlag
   y2 <- origy[-(1:(maxlag))]
   
-  x <- matrix(0, nrow = n, ncol = maxlag)
+  x <- matrix(0, nrow = n, ncol = maxlag + 1)
   for(i in 1:maxlag){
     x[ ,i] <- origy[(orign - i - n + 1)    :  (orign - i)]
   }
-  colnames(x) <- paste0("lag", 1:maxlag)
+  x[ , ncol(x)] <- time(y2)
+  colnames(x) <- c(paste0("lag", 1:maxlag), "time")
   
   cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = 10, 
                early.stop.round = 5, maximize = FALSE, verbose = verbose)
@@ -59,12 +59,19 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verb
 forecast.xgbts <- function(object, 
                           h = ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10),
                           xreg = NULL){
+  # object <- xgbts(AirPassengers)
   f <- frequency(object$y)
   
-  forward1 <- function(x, y, model){
-   newrow <- matrix(c(y[length(y)], x[nrow(x), -ncol(x)]), nrow = 1)
+  # forecast times
+  htime <- time(ts(rep(0, h), frequency = f, start = max(time(object$y)) + 1 / f))
+  
+  forward1 <- function(x, y, time, model){
+   newrow <- matrix(c(y[length(y)], x[nrow(x), 1:(ncol(x) - 2)], time), nrow = 1)
    colnames(newrow) <- colnames(x)
+   print(round(newrow, 1))
+   
    pred <- predict(model, newdata = newrow)
+   
    return(list(
      x = rbind(x, newrow),
      y = c(y, pred)
@@ -74,7 +81,7 @@ forecast.xgbts <- function(object,
   x <- object$x
   y <- object$y2
   for(i in 1:h){
-    tmp <- forward1(x, y, object$model)  
+    tmp <- forward1(x, y, time = htime[i], model = object$model)  
     x <- tmp$x
     y <- tmp$y
   }
