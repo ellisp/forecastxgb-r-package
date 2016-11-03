@@ -8,6 +8,8 @@ importance(object, ...)
 }
 \arguments{
 \item{object}{An object of class \code{xgbts}, usually created with \code{xgbts()}}
+
+\item{...}{Extra parameters passed through to \code{xgb.importance}}
 }
 \value{
 A \code{data.table} of the features used in the model with their average gain 
