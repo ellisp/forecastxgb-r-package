@@ -1,4 +1,4 @@
 library(testthat)
-library(forecastxg)
+library(forecastxgb)
 
-test_check("forecastxg")
+test_check("forecastxgb")

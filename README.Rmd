@@ -1,0 +1,18 @@
+# forecastxgb-r-package
+An R package for time series models and forecasts with xgboost compatible with {forecast} S3 classes
+
+Only on GitHub.  Incomplete.  
+
+```{r eval = FALSE}
+devtools::install_github("ellisp/forecastxgb-r-package/pkg")
+```
+
+Seems to overfit rather severely:
+```{r}
+model <- xgbts(AirPassengers)
+fc <- forecast(model, h = 12)
+fc
+plot(fc)
+
+```
+

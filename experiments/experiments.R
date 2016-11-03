@@ -1,4 +1,4 @@
-library(forecastxg)
+library(forecastxgb)
 
 fc1 <- forecast(auto.arima(AirPassengers), level = FALSE, h = 36)
 accuracy(fc1)
