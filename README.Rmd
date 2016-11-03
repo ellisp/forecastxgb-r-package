@@ -11,7 +11,7 @@ Seems to overfit rather severely:
 ```{r}
 model <- xgbts(AirPassengers)
 fc <- forecast(model, h = 12)
-fc
+accuracy(fc)
 plot(fc)
 
 ```

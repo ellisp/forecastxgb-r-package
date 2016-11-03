@@ -19,7 +19,7 @@ model <- xgbts(AirPassengers)
 ```
 
 ```
-## Stopping. Best iteration: 64
+## Stopping. Best iteration: 54
 ```
 
 ```
@@ -28,14 +28,14 @@ model <- xgbts(AirPassengers)
 
 ```r
 fc <- forecast(model, h = 12)
-fc
+accuracy(fc)
 ```
 
 ```
-##           Jan      Feb      Mar      Apr      May      Jun      Jul
-## 1961 454.0357 446.6316 444.8359 503.9461 535.9756 621.7036 621.3882
-##           Aug      Sep      Oct      Nov      Dec
-## 1961 603.4312 556.1086 474.5876 419.3545 449.9680
+##                        ME       RMSE        MAE           MPE       MAPE
+## Training set 0.0003279368 0.05035866 0.03653628 -0.0005760288 0.01332563
+##                     MASE       ACF1
+## Training set 0.001140679 -0.1669532
 ```
 
 ```r
