@@ -16,7 +16,7 @@
 #' @param ... Additional arguments passed to \code{xgboost}.
 #' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
-xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, 
+xgbts <- function(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 100, 
                   nfold = 10, verbose = FALSE, ...){
   # y <- AirPassengers
 
@@ -24,29 +24,47 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100,
   
   
   # check xreg, if it exists, is a numeric matrix
-  
+  if(!is.null(xreg)){
+    warning("External regressors not yet implemented.  xreg will be ignored.")
+  }
   
   f <- stats::frequency(y)
   if(maxlag < f){
-    stop("Must have at least one full period of lags.")
+    stop("At least one full period of lags needed.")
   }
   
   orign <- length(y)
   origy <- y
   n <- orign - maxlag
-  y2 <- origy[-(1:(maxlag))]
+  y2 <- ts(origy[-(1:(maxlag))], start = time(origy)[maxlag + 1], frequency = f)
   
-  x <- matrix(0, nrow = n, ncol = maxlag + 1)
+  #----------------------------creating x--------------------
+  # create lagged versions of y to be part of x
+  x <- matrix(0, nrow = n, ncol = maxlag + f)
   for(i in 1:maxlag){
     x[ ,i] <- origy[(orign - i - n + 1)    :  (orign - i)]
   }
-  x[ , ncol(x)] <- time(y2)
-  colnames(x) <- c(paste0("lag", 1:maxlag), "time")
   
+  # add a linear time variable for x
+  x[ , maxlag + 1] <- time(y2)
+  
+  # one hot encoding of seasons
+  tmp <- data.frame(y = 1, x = as.character(rep_len(1:f, n)))
+  seasons <- model.matrix(y ~ x, data = tmp)[ ,-1]
+  x[ , maxlag + 2:f] <- seasons
+  
+  # rename columns of x
+  colnames(x) <- c(paste0("lag", 1:maxlag), "time", paste0("season", 2:f))
+  
+  #---------------model fitting--------------------
+  message("Starting cross-validation")
   cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
                early.stop.round = 5, maximize = FALSE, verbose = verbose)
+  # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE
+  
   best <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
   
+  message("Fitting xgboost model")
   model <- xgboost(data = x, label = y2, nrounds = best, verbose = verbose, ...)
   
   output <- list(
@@ -85,8 +103,17 @@ forecast.xgbts <- function(object,
   # forecast times
   htime <- time(ts(rep(0, h), frequency = f, start = max(time(object$y)) + 1 / f))
   
-  forward1 <- function(x, y, time, model){
-   newrow <- matrix(c(y[length(y)], x[nrow(x), 1:(ncol(x) - 2)], time), nrow = 1)
+  forward1 <- function(x, y, timepred, model){
+   newrow <- matrix(c(
+     # latest lagged value:
+     y[length(y)], 
+     # previous lagged values:
+     x[nrow(x), 1:(object$maxlag - 1)], 
+     # linear time:
+     timepred,
+     # seasons:
+     x[(nrow(x) + 1 - f), (object$maxlag + 2):(object$maxlag + f)]
+     ), nrow = 1)
    colnames(newrow) <- colnames(x)
    
    pred <- predict(model, newdata = newrow)
@@ -100,7 +127,7 @@ forecast.xgbts <- function(object,
   x <- object$x
   y <- object$y2
   for(i in 1:h){
-    tmp <- forward1(x, y, time = htime[i], model = object$model)  
+    tmp <- forward1(x, y, timepred = htime[i], model = object$model)  
     x <- tmp$x
     y <- tmp$y
   }

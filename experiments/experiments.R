@@ -1,13 +1,14 @@
 library(forecastxg)
 
 fc1 <- forecast(auto.arima(AirPassengers), level = FALSE, h = 36)
-
-object <- xgbts(AirPassengers, maxlag = 30)
+accuracy(fc1)
+object <- xgbts(AirPassengers, maxlag = 12)
 plot(object)
 
-fc2 <- forecast(object, h = 12)
+fc2 <- forecast(object, h = 36)
 plot(fc1)
 plot(fc2)
+accuracy(fc2) # looks like rather extreme overfitting!
 
 
 fc1$mean
@@ -34,5 +35,5 @@ fc2$method
 plot(fc1)
 plot(fc2)
 
-
-
+modnile <- xgbts(Nile, maxlag = 4)
+plot(modnile)
