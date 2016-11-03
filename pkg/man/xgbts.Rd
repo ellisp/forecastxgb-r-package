@@ -5,15 +5,25 @@
 \title{xgboost time series modelling}
 \usage{
 xgbts(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100,
-  verbose = FALSE, ...)
+  nfold = 10, verbose = FALSE, ...)
 }
 \arguments{
-\item{nrounds}{Maximum number of iterations in cross validation to determine}
+\item{y}{A univariate time series.}
 
-\item{nfold}{Number of equal size subsamples during cross validation}
+\item{xreg}{Optionally, a vector or matrix of external regressors, which must have the same number of rows as y.}
+
+\item{maxlag}{The maximum number of lags of \code{y} and \code{xreg} (if included) to be considered as features.}
+
+\item{nrounds}{Maximum number of iterations in cross validation to determine.}
+
+\item{nfold}{Number of equal size subsamples during cross validation.}
+
+\item{verbose}{Passed on to \code{xgboost} and \code{xgb.cv}.}
+
+\item{...}{Additional arguments passed to \code{xgboost}.}
 }
 \value{
-An object of class \code{xgbts}
+An object of class \code{xgbts}.
 }
 \description{
 Fit a model to a time series using xgboost

@@ -7,11 +7,17 @@
 #' @import xgboost
 #' @import forecast
 #' @import stats
-#' @param nrounds Maximum number of iterations in cross validation to determine
-#' @param nfold Number of equal size subsamples during cross validation
-#' @return An object of class \code{xgbts}
+#' @param y A univariate time series.
+#' @param xreg Optionally, a vector or matrix of external regressors, which must have the same number of rows as y.
+#' @param nrounds Maximum number of iterations in cross validation to determine.
+#' @param nfold Number of equal size subsamples during cross validation.
+#' @param maxlag The maximum number of lags of \code{y} and \code{xreg} (if included) to be considered as features.
+#' @param verbose Passed on to \code{xgboost} and \code{xgb.cv}.
+#' @param ... Additional arguments passed to \code{xgboost}.
+#' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
-xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verbose = FALSE, ...){
+xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, 
+                  nfold = 10, verbose = FALSE, ...){
   # y <- AirPassengers
 
   # check y is a univariate time series
@@ -37,7 +43,7 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verb
   x[ , ncol(x)] <- time(y2)
   colnames(x) <- c(paste0("lag", 1:maxlag), "time")
   
-  cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = 10, 
+  cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
                early.stop.round = 5, maximize = FALSE, verbose = verbose)
   best <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
   
