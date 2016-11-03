@@ -44,6 +44,9 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verb
     y2 = y2,
     x = x,
     model = model,
+    fitted = ts(c(rep(NA, maxlag), 
+                  predict(model, newdata = x)), 
+                frequency = f, start = min(time(origy))), 
     maxlag = maxlag
   )
   class(output) <- "xgbts"
@@ -68,7 +71,6 @@ forecast.xgbts <- function(object,
   forward1 <- function(x, y, time, model){
    newrow <- matrix(c(y[length(y)], x[nrow(x), 1:(ncol(x) - 2)], time), nrow = 1)
    colnames(newrow) <- colnames(x)
-   print(round(newrow, 1))
    
    pred <- predict(model, newdata = newrow)
    
@@ -93,9 +95,7 @@ forecast.xgbts <- function(object,
   output <- list(
     x = object$y,
     mean = y,
-    fitted = ts(c(rep(NA, object$maxlag), 
-                  predict(object$model, newdata = object$x)), 
-                frequency = f, start = min(time(object$y))), 
+    fitted = object$fitted,
     method = "xgboost"
   )
   class(output) <- "forecast"
