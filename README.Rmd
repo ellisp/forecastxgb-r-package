@@ -7,12 +7,34 @@ Only on GitHub.  Incomplete.
 devtools::install_github("ellisp/forecastxgb-r-package/pkg")
 ```
 
-Seems to overfit rather severely:
+## Usage
+Seems to overfit rather severely, judging from the in-sample accuracy.  This is despite there being a cross-validation step:
 ```{r}
+library(forecastxgb)
 model <- xgbts(AirPassengers)
 fc <- forecast(model, h = 12)
 accuracy(fc)
 plot(fc)
+
+```
+
+
+## Tourism data example
+```{r}
+library(Tcomp)
+
+thedata <- tourism[[1]]
+plot(thedata)
+
+x <-thedata$x
+h <- thedata$h
+
+model <- xgbts(x)
+fc <- forecast(model, h = h)
+plot(fc, bty = "l")
+lines(thedata$xx, col = "red")
+
+accuracy(fc, thedata$xx)
 
 ```
 
