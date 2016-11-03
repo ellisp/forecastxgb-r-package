@@ -7,7 +7,20 @@
 \method{forecast}{xgbts}(object, h = ifelse(frequency(object$y) > 1, 2 *
   frequency(object$y), 10), xreg = NULL)
 }
+\arguments{
+\item{object}{An object of class "\code{xgbts}".  Usuall the result of a call to \code{\link{xgbts}}.}
+
+\item{h}{Number of periods for forecasting}
+
+\item{xreg}{Future values of regression variables.}
+}
+\value{
+An object of class \code{forecast}
+}
 \description{
 Returns forecasts and other information for xgboost timeseries modesl fit with \code{xbgts}
+}
+\author{
+Peter Ellis
 }
 

@@ -10,9 +10,15 @@ xgbts(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100,
 \arguments{
 \item{nrounds}{Maximum number of iterations in cross validation to determine}
 
-\item{nfold}{number of equal size subsamples during cross validation}
+\item{nfold}{Number of equal size subsamples during cross validation}
+}
+\value{
+An object of class \code{xgbts}
 }
 \description{
 Fit a model to a time series using xgboost
+}
+\author{
+Peter Ellis
 }
 

@@ -6,7 +6,9 @@
 #' @export
 #' @import xgboost
 #' @param nrounds Maximum number of iterations in cross validation to determine
-#' @param nfold number of equal size subsamples during cross validation
+#' @param nfold Number of equal size subsamples during cross validation
+#' @return An object of class \code{xgbts}
+#' @author Peter Ellis
 xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verbose = FALSE, ...){
   # y <- AirPassengers
 
@@ -59,6 +61,11 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100, verb
 #' Returns forecasts and other information for xgboost timeseries modesl fit with \code{xbgts}
 #' 
 #' @export
+#' @param object An object of class "\code{xgbts}".  Usuall the result of a call to \code{\link{xgbts}}.
+#' @param h Number of periods for forecasting
+#' @param xreg Future values of regression variables.
+#' @return An object of class \code{forecast}
+#' @author Peter Ellis
 forecast.xgbts <- function(object, 
                           h = ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10),
                           xreg = NULL){
