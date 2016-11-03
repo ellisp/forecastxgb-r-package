@@ -69,6 +69,8 @@ xgbts <- function(y, xreg = NULL, maxlag = 2 * frequency(y), nrounds = 100,
 #' Returns forecasts and other information for xgboost timeseries modesl fit with \code{xbgts}
 #' 
 #' @export
+#' @import forecast
+#' @import xgboost
 #' @param object An object of class "\code{xgbts}".  Usuall the result of a call to \code{\link{xgbts}}.
 #' @param h Number of periods for forecasting
 #' @param xreg Future values of regression variables.

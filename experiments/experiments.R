@@ -1,13 +1,14 @@
 library(forecastxg)
 
-fc1 <- forecast(AirPassengers, level = FALSE)
+fc1 <- forecast(auto.arima(AirPassengers), level = FALSE, h = 36)
 
 object <- xgbts(AirPassengers, maxlag = 30)
-plot.xgbts(object)
+plot(object)
 
-fc2 <- forecast.xgbts(object)
-plot(fc2)
+fc2 <- forecast(object, h = 12)
 plot(fc1)
+plot(fc2)
+
 
 fc1$mean
 fc2$mean
