@@ -5,6 +5,7 @@
 #' 
 #' @export
 #' @import xgboost
+#' @import forecast
 #' @param nrounds Maximum number of iterations in cross validation to determine
 #' @param nfold Number of equal size subsamples during cross validation
 #' @return An object of class \code{xgbts}
