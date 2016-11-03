@@ -10,6 +10,7 @@ plot(fc1)
 plot(fc2)
 accuracy(fc2) # looks like rather extreme overfitting!
 
+xgb.importance(colnames(object$x), model = object$model)
 
 fc1$mean
 fc2$mean
