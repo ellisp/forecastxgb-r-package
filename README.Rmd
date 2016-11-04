@@ -10,7 +10,7 @@ devtools::install_github("ellisp/forecastxgb-r-package/pkg")
 ```
 
 ## Usage
-Seems to overfit rather severely, judging from the in-sample accuracy.  This is despite there being a cross-validation step:
+
 ```{r}
 library(forecastxgb)
 model <- xgbts(AirPassengers)
@@ -31,7 +31,7 @@ x <-thedata$x
 h <- thedata$h
 
 model <- xgbts(x)
-xgbts_importance(model)
+summary(model)
 
 
 fc <- forecast(model, h = h)

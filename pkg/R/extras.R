@@ -14,10 +14,29 @@ xgbts_importance <- function(object, ...){
   xgb.importance(colnames(object$x), model = object$model, ...)
 }
 
-
-summary.xgbts <- function(object, ...){
-  if(class(object) != "xgbts"){
-    stop("'object' should be an object of class xgbts.")
-  }
+#' Summary of an xgbts object
+#' 
+#' summary method for an object created by xgbts
+#' @aliases print.summary.xgbts
+#' @export
+#' @param object An object created by \code{xgbts}
+summary.xgbts <- function(object){
+  ans <- object
+  ans$importance <- xgbts_importance(object)
+  ans$n <- length(object$y)
+  ans$effectn <- length(object$y2)
+  ans$ncolx <- ncol(object$x)
+  class(ans) <- "summary.xgbts"
+  return(ans)
+}
   
+#' @export
+print.summary.xgbts <- function(ans){
+  
+  cat("\nImportance of features in the xgboost model:\n")
+  print(ans$importance)
+  
+  cat(paste("\n", ans$ncolx, "features considered.\n"))
+  cat(paste0(ans$n, " original observations.\n", 
+            ans$effectn, " effective observations after creating lagged features.\n"))
 }
