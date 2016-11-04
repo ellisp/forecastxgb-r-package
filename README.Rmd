@@ -26,7 +26,6 @@ plot(fc)
 library(Tcomp)
 
 thedata <- tourism[[1]]
-plot(thedata)
 
 x <-thedata$x
 h <- thedata$h
@@ -35,7 +34,7 @@ model <- xgbts(x)
 fc <- forecast(model, h = h)
 plot(fc, bty = "l")
 lines(thedata$xx, col = "red")
-
+legend("topleft", legend = c("xgb forecast", "actual"), lty = 1, col = c("blue", "red"), bty ="n")
 accuracy(fc, thedata$xx)
 
 ```

@@ -23,7 +23,7 @@ model <- xgbts(AirPassengers)
 ```
 
 ```
-## Stopping. Best iteration: 40
+## Stopping. Best iteration: 38
 ```
 
 ```
@@ -36,10 +36,10 @@ accuracy(fc)
 ```
 
 ```
-##                      ME      RMSE       MAE         MPE      MAPE
-## Training set 0.01076215 0.2486154 0.1879821 0.000896467 0.0685559
+##                      ME      RMSE       MAE         MPE       MAPE
+## Training set 0.01643817 0.3105414 0.2290338 0.001867709 0.08183448
 ##                     MASE       ACF1
-## Training set 0.005868881 -0.1446392
+## Training set 0.007150535 -0.1159689
 ```
 
 ```r
@@ -55,12 +55,7 @@ plot(fc)
 library(Tcomp)
 
 thedata <- tourism[[1]]
-plot(thedata)
-```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png)
-
-```r
 x <-thedata$x
 h <- thedata$h
 
@@ -72,7 +67,7 @@ model <- xgbts(x)
 ```
 
 ```
-## Stopping. Best iteration: 21
+## Stopping. Best iteration: 16
 ```
 
 ```
@@ -83,20 +78,21 @@ model <- xgbts(x)
 fc <- forecast(model, h = h)
 plot(fc, bty = "l")
 lines(thedata$xx, col = "red")
+legend("topleft", legend = c("xgb forecast", "actual"), lty = 1, col = c("blue", "red"), bty ="n")
 ```
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-2.png)
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png)
 
 ```r
 accuracy(fc, thedata$xx)
 ```
 
 ```
-##                      ME      RMSE       MAE        MPE      MAPE
-## Training set   4.244689  20.11645  14.28426 0.09989322 0.6468516
-## Test set     241.150926 378.42260 286.04720 6.56172156 8.6439682
-##                    MASE       ACF1 Theil's U
-## Training set 0.07516579 -0.0595232        NA
-## Test set     1.50522066  0.1084859 0.3993886
+##                     ME      RMSE       MAE      MPE     MAPE      MASE
+## Training set  16.44529  40.36934  26.58402 0.492309 1.057617 0.1398889
+## Test set     262.53091 393.97171 305.39539 7.215540 9.214990 1.6070336
+##                    ACF1 Theil's U
+## Training set 0.05805567        NA
+## Test set     0.08914576 0.4090183
 ```
 
