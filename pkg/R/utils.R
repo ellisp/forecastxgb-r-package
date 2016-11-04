@@ -25,12 +25,23 @@ lagvm <- function(x, maxlag){
   if(!is.matrix(x)){
     stop("X needs to be a matrix")
   }
+  
+  if(is.null(colnames(x))){
+    colnames(x) <- paste0("Var", 1:ncol(x))
+  }
   n <- nrow(x)
   M <- matrix(0, nrow = (n - maxlag), ncol = (maxlag + 1) * ncol(x))
   for(i in 1:ncol(x)){
     M[ , 1:(maxlag + 1) + (i - 1) * (maxlag + 1)] <- lagv(x[ ,i], maxlag = maxlag)
-    
   }
+  thenames <- character()
+  for(i in 1:ncol(x)){
+    thenames <- c(thenames, paste0(colnames(x)[i], "_lag", 0:maxlag))
+  }
+  colnames(M) <- thenames
+  
   return(M)
 }
+
+
 

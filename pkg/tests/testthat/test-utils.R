@@ -9,6 +9,9 @@ test_that("lagv produces the correct lagged matrix", {
 
 test_that("lagvm produces the correct lagged matrix", {
   m <- cbind(3:4, 2:3, 1:2, 13:14, 12:13, 11:12)
+  colnames(m) <- c("A_lag0", "A_lag1", "A_lag2", "B_lag0", "B_lag1","B_lag2")
   test <- cbind(1:4, 11:14)
+  colnames(test) <- c("A", "B")
   expect_equal(m, lagvm(test, maxlag = 2))
 })
+
