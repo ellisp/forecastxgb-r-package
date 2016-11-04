@@ -71,6 +71,11 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   } else {
     colnames(x) <- c(paste0("lag", 1:maxlag), "time")
   }
+  
+  # add xreg, if present
+  if(!is.null(xreg)){
+    x <- cbind(x, xreg[-(1:maxlag), , drop = FALSE])
+  }
   #---------------model fitting--------------------
   if(cv){
     message("Starting cross-validation")
