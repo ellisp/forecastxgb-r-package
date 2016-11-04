@@ -11,11 +11,26 @@ lagv <- function(x, maxlag, keeporig = TRUE){
   for(i in 1:ncol(z)){
     z[ , i] <- x[(maxlag + 2 - i):(n + 1 - i)] 
   }
-  varname <- "hi-there"
+  varname <- "x"
   colnames(z) <- c(varname, paste0(varname, "_lag", 1:maxlag))
   if(!keeporig){
     z <- z[ ,-1]
   }
   return(z)
+}
+
+# not exported
+# function to take a matrix and make a wider matrix with many lagged versions
+lagvm <- function(x, maxlag){
+  if(!is.matrix(x)){
+    stop("X needs to be a matrix")
+  }
+  n <- nrow(x)
+  M <- matrix(0, nrow = (n - maxlag), ncol = (maxlag + 1) * ncol(x))
+  for(i in 1:ncol(x)){
+    M[ , 1:(maxlag + 1) + (i - 1) * (maxlag + 1)] <- lagv(x[ ,i], maxlag = maxlag)
+    
+  }
+  return(M)
 }
 

@@ -5,3 +5,10 @@ test_that("lagv produces the correct lagged matrix", {
   x <- 1:10
   expect_equal(m, lagv(x, maxlag = 5))
 })
+
+
+test_that("lagvm produces the correct lagged matrix", {
+  m <- cbind(3:4, 2:3, 1:2, 13:14, 12:13, 11:12)
+  test <- cbind(1:4, 11:14)
+  expect_equal(m, lagvm(test, maxlag = 2))
+})
