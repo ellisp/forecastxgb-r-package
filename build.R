@@ -4,11 +4,10 @@ library(knitr)
 
 # compile Readme
 knit("README.Rmd", "README.md")
+test("pkg")
 
 document("pkg")
-test("pkg")
 check("pkg")
 
 build("pkg")
-
 

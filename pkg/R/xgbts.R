@@ -53,9 +53,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   #----------------------------creating x--------------------
   # create lagged versions of y to be part of x
   x <- matrix(0, nrow = n, ncol = maxlag + f)
-  for(i in 1:maxlag){
-    x[ ,i] <- origy[(orign - i - n + 1)    :  (orign - i)]
-  }
+  x[ , 1:maxlag] <- lagv(origy, maxlag, keeporig = FALSE)
   
   # add a linear time variable for x
   x[ , maxlag + 1] <- time(y2)
@@ -126,7 +124,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
 #' @return An object of class \code{forecast}
 #' @author Peter Ellis
 forecast.xgbts <- function(object, 
-                          h = ifelse(exists("xreg"), nrow(xreg), ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10)),
+                          h = NULL,
                           xreg = NULL, ...){
   # validity checks on xreg
   if(!is.null(xreg)){
@@ -147,11 +145,19 @@ forecast.xgbts <- function(object,
       stop("Number of columns in xreg doesn't match the original xgbts object.")
     }
     
-    if(h != nrow(xreg)){
-      stop("xreg must have same number of observations as h")
+    if(!is.null(h)){
+      warning(paste("Ignoring h and forecasting", nrow(xreg), "periods from xreg."))
     }
     
+    h <- nrow(xreg)
+    
   } 
+  
+  if(is.null(h)){
+    h <- ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10)
+    message(paste("No h provided so forecasting forward", h, "periods."))
+  }
+  
   
   f <- frequency(object$y)
   

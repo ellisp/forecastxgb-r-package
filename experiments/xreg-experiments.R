@@ -1,18 +1,30 @@
 library(fpp)
-fit <- Arima(usconsumption[,1], xreg=usconsumption[,2],
+fit1 <- Arima(usconsumption[,1], xreg=usconsumption[,2],
              order=c(2,0,0))
-tsdisplay(arima.errors(fit), main="ARIMA errors")
-summary(fit)
+tsdisplay(arima.errors(fit1), main="ARIMA errors")
+summary(fit1)
+fc1 <- forecast(fit1, xreg = income_future)
+names(fc1)
+fc$method
 
 fit2 <- xgbts(y = usconsumption[,1], xreg = matrix(usconsumption[,2], dimnames = list(NULL, "Income")))
+fit3 <- xgbts(usconsumption[,1])
+forecast(fit3)
 summary(fit2)
 
 
 
 income_future <- matrix(forecast(usconsumption[,2], h = 10)$mean, dimnames = list(NULL, "Income"))
-fc <- forecast(fit2, xreg = income_future)
+fc2 <- forecast(fit2, xreg = income_future, h = 4)# should be a warning
+fc3 <- forecast(fit3)
 plot(fit2)
-plot(fc)
+plot(fc2)
+plot(fc3)
+names(fc2)
+fc2$method
+fc1$method
+fc2$model
+class(fc1$model)
 
 class(xreg)
 plot(xreg)
