@@ -7,6 +7,6 @@
 #' @return A \code{data.table} of the features used in the model with their average gain 
 #' (and their weight for boosted tree model) in the model.
 #' @seealso \code{\link[xgboost]{xgb.importance}}
-importance <- function(object, ...){
+xgbts_importance <- function(object, ...){
   xgb.importance(colnames(object$x), model = object$model, ...)
 }

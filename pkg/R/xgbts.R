@@ -19,7 +19,7 @@
 #' @param ... Additional arguments passed to \code{xgboost}.
 #' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
-xgbts <- function(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 100, 
+xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   cv = TRUE, nfold = 10, verbose = FALSE, ...){
   # y <- AirPassengers # for dev
 
@@ -118,16 +118,19 @@ forecast.xgbts <- function(object,
   htime <- time(ts(rep(0, h), frequency = f, start = max(time(object$y)) + 1 / f))
   
   forward1 <- function(x, y, timepred, model){
-   newrow <- matrix(c(
+   newrow <- c(
      # latest lagged value:
      y[length(y)], 
      # previous lagged values:
      x[nrow(x), 1:(object$maxlag - 1)], 
      # linear time:
-     timepred,
+     timepred)
+   if(f > 1){
      # seasons:
-     x[(nrow(x) + 1 - f), (object$maxlag + 2):(object$maxlag + f)]
-     ), nrow = 1)
+     newrow <- c(newrow, x[(nrow(x) + 1 - f), (object$maxlag + 2):(object$maxlag + f)])
+   }
+     
+   newrow <- matrix(newrow, nrow = 1)
    colnames(newrow) <- colnames(x)
    
    pred <- predict(model, newdata = newrow)

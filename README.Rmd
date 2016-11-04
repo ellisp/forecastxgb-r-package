@@ -36,6 +36,15 @@ plot(fc, bty = "l")
 lines(thedata$xx, col = "red")
 legend("topleft", legend = c("xgb forecast", "actual"), lty = 1, col = c("blue", "red"), bty ="n")
 accuracy(fc, thedata$xx)
+xgbts_importance(fc)
+```
 
+## Non-seasonal data
+
+```{r}
+obj <- xgbts(Nile)
+xgbts_importance(obj)
+fc <- forecast(obj, 30)
+plot(fc, bty = "l")
 ```
 

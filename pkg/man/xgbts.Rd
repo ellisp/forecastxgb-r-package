@@ -4,7 +4,7 @@
 \alias{xgbts}
 \title{xgboost time series modelling}
 \usage{
-xgbts(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 100,
+xgbts(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
   cv = TRUE, nfold = 10, verbose = FALSE, ...)
 }
 \arguments{
