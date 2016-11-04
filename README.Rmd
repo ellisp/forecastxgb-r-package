@@ -5,6 +5,11 @@ Only on GitHub.  Very early days, incomplete.  Planned addition is support for `
 
 This implementation uses as features lagged values of the target variable, linear time, and dummy variables for seasons.
 
+```{r echo = FALSE}
+set.seed(123)
+```
+
+
 ```{r eval = FALSE}
 devtools::install_github("ellisp/forecastxgb-r-package/pkg")
 ```

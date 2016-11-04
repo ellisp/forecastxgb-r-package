@@ -5,10 +5,12 @@
 \alias{summary.xgbts}
 \title{Summary of an xgbts object}
 \usage{
-\method{summary}{xgbts}(object)
+\method{summary}{xgbts}(object, ...)
 }
 \arguments{
 \item{object}{An object created by \code{xgbts}}
+
+\item{...}{Ignored.}
 }
 \description{
 summary method for an object created by xgbts

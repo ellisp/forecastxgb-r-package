@@ -20,7 +20,8 @@ xgbts_importance <- function(object, ...){
 #' @aliases print.summary.xgbts
 #' @export
 #' @param object An object created by \code{xgbts}
-summary.xgbts <- function(object){
+#' @param ... Ignored.
+summary.xgbts <- function(object, ...){
   ans <- object
   ans$importance <- xgbts_importance(object)
   ans$n <- length(object$y)
@@ -31,12 +32,13 @@ summary.xgbts <- function(object){
 }
   
 #' @export
-print.summary.xgbts <- function(ans){
+#' @method print summary.xgbts
+print.summary.xgbts <- function(x, ...){
   
   cat("\nImportance of features in the xgboost model:\n")
-  print(ans$importance)
+  print(x$importance)
   
-  cat(paste("\n", ans$ncolx, "features considered.\n"))
-  cat(paste0(ans$n, " original observations.\n", 
-            ans$effectn, " effective observations after creating lagged features.\n"))
+  cat(paste("\n", x$ncolx, "features considered.\n"))
+  cat(paste0(x$n, " original observations.\n", 
+            x$effectn, " effective observations after creating lagged features.\n"))
 }

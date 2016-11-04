@@ -4,10 +4,10 @@
 \alias{plot.xgbts}
 \title{Plot xgbts object}
 \usage{
-plot.xgbts(object, ...)
+\method{plot}{xgbts}(x, ...)
 }
 \arguments{
-\item{object}{An object created by \code{xgbts}}
+\item{x}{An object created by \code{xgbts}}
 
 \item{...}{Additional arguments passed through to \code{plot()}}
 }

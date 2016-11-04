@@ -1,6 +1,6 @@
 Package: forecastxgb
 Title: Time Series Models and Forecasts using "xgboost"
-Version: 0.0.1.9000
+Version: 0.0.2.9000
 Authors@R: person("Peter", "Ellis", email = "peter.ellis2013nz@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends:

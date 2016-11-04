@@ -103,14 +103,16 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
 #' @export
 #' @import forecast
 #' @import xgboost
+#' @method forecast xgbts
 #' @param object An object of class "\code{xgbts}".  Usuall the result of a call to \code{\link{xgbts}}.
 #' @param h Number of periods for forecasting
 #' @param xreg Future values of regression variables.
+#' @param ... Ignored.
 #' @return An object of class \code{forecast}
 #' @author Peter Ellis
 forecast.xgbts <- function(object, 
                           h = ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10),
-                          xreg = NULL){
+                          xreg = NULL, ...){
   # object <- xgbts(AirPassengers)
   f <- frequency(object$y)
   
