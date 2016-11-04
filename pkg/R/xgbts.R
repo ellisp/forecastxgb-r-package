@@ -30,9 +30,13 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
   # check xreg, if it exists, is a numeric matrix
   if(!is.null(xreg)){
-    warning("External regressors not yet implemented.  xreg will be ignored.")
+    if(class(xreg) == "ts" | "data.frame" %in% class(xreg)){
+      message("Converting xreg into a matrix")
+      xreg <- as.matrix(xreg)
+    }
+    
     if(!is.numeric(xreg) | !is.matrix(xreg)){
-      stop("xreg should be a numeric matrix")
+      stop("xreg should be a numeric and able to be coerced to a matrix")
     }
   }
 
