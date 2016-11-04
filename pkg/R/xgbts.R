@@ -21,7 +21,7 @@
 #' @author Peter Ellis
 xgbts <- function(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 100, 
                   cv = TRUE, nfold = 10, verbose = FALSE, ...){
-  # y <- AirPassengers
+  # y <- AirPassengers # for dev
 
   # check y is a univariate time series
   if(class(y) != "ts"){
@@ -57,13 +57,16 @@ xgbts <- function(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 1
   x[ , maxlag + 1] <- time(y2)
   
   # one hot encoding of seasons
-  tmp <- data.frame(y = 1, x = as.character(rep_len(1:f, n)))
-  seasons <- model.matrix(y ~ x, data = tmp)[ ,-1]
-  x[ , maxlag + 2:f] <- seasons
-  
-  # rename columns of x
-  colnames(x) <- c(paste0("lag", 1:maxlag), "time", paste0("season", 2:f))
-  
+  if(f > 1){
+    tmp <- data.frame(y = 1, x = as.character(rep_len(1:f, n)))
+    seasons <- model.matrix(y ~ x, data = tmp)[ ,-1]
+    x[ , maxlag + 2:f] <- seasons
+    
+    # rename columns of x
+    colnames(x) <- c(paste0("lag", 1:maxlag), "time", paste0("season", 2:f))
+  } else {
+    colnames(x) <- c(paste0("lag", 1:maxlag), "time")
+  }
   #---------------model fitting--------------------
   if(cv){
     message("Starting cross-validation")
