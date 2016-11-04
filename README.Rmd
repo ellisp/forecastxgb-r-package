@@ -1,7 +1,7 @@
 # forecastxgb-r-package
 An R package for time series models and forecasts with xgboost compatible with {forecast} S3 classes
 
-Only on GitHub.  Very early days, incomplete.  So far only works with seasonal univariate continuous time series.  Planned addition is support for `xreg` and for non-seasonal data.
+Only on GitHub.  Very early days, incomplete.  Planned addition is support for `xreg`.
 
 This implementation uses as features lagged values of the target variable, linear time, and dummy variables for seasons.
 
@@ -31,12 +31,14 @@ x <-thedata$x
 h <- thedata$h
 
 model <- xgbts(x)
+xgbts_importance(model)
+
+
 fc <- forecast(model, h = h)
 plot(fc, bty = "l")
 lines(thedata$xx, col = "red")
 legend("topleft", legend = c("xgb forecast", "actual"), lty = 1, col = c("blue", "red"), bty ="n")
 accuracy(fc, thedata$xx)
-xgbts_importance(fc)
 ```
 
 ## Non-seasonal data

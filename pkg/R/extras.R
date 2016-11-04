@@ -8,5 +8,16 @@
 #' (and their weight for boosted tree model) in the model.
 #' @seealso \code{\link[xgboost]{xgb.importance}}
 xgbts_importance <- function(object, ...){
+  if(class(object) != "xgbts"){
+    stop("'object' should be an object of class xgbts.")
+  }
   xgb.importance(colnames(object$x), model = object$model, ...)
+}
+
+
+summary.xgbts <- function(object, ...){
+  if(class(object) != "xgbts"){
+    stop("'object' should be an object of class xgbts.")
+  }
+  
 }
