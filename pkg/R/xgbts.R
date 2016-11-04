@@ -73,9 +73,12 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   }
   
   # add xreg, if present
+  # TODO - add lags of xreg too
   if(!is.null(xreg)){
     x <- cbind(x, xreg[-(1:maxlag), , drop = FALSE])
   }
+  
+  
   #---------------model fitting--------------------
   if(cv){
     message("Starting cross-validation")
@@ -100,6 +103,9 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
                 frequency = f, start = min(time(origy))), 
     maxlag = maxlag
   )
+  if(!is.null(xreg)){
+    output$ncolxreg <- ncol(xreg)
+  }
   class(output) <- "xgbts"
   return(output)
 
@@ -120,15 +126,39 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
 #' @return An object of class \code{forecast}
 #' @author Peter Ellis
 forecast.xgbts <- function(object, 
-                          h = ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10),
+                          h = ifelse(exists("xreg"), nrow(xreg), ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10)),
                           xreg = NULL, ...){
-  # object <- xgbts(AirPassengers)
+  # validity checks on xreg
+  if(!is.null(xreg)){
+    if(is.null(object$ncolxreg)){
+      stop("You supplied an xreg, but there is none in the original xgbts object.")
+    }
+    
+    if(class(xreg) == "ts" | "data.frame" %in% class(xreg)){
+      message("Converting xreg into a matrix")
+      xreg <- as.matrix(xreg)
+    }
+    
+    if(!is.numeric(xreg) | !is.matrix(xreg)){
+      stop("xreg should be a numeric and able to be coerced to a matrix")
+    }
+    
+    if(ncol(xreg) != object$ncolxreg){
+      stop("Number of columns in xreg doesn't match the original xgbts object.")
+    }
+    
+    if(h != nrow(xreg)){
+      stop("xreg must have same number of observations as h")
+    }
+    
+  } 
+  
   f <- frequency(object$y)
   
   # forecast times
   htime <- time(ts(rep(0, h), frequency = f, start = max(time(object$y)) + 1 / f))
   
-  forward1 <- function(x, y, timepred, model){
+  forward1 <- function(x, y, timepred, model, xregpred){
    newrow <- c(
      # latest lagged value:
      y[length(y)], 
@@ -140,7 +170,10 @@ forecast.xgbts <- function(object,
      # seasons:
      newrow <- c(newrow, x[(nrow(x) + 1 - f), (object$maxlag + 2):(object$maxlag + f)])
    }
-     
+   if(!is.null(xregpred)){
+     newrow <- c(newrow, xregpred)
+   }
+   
    newrow <- matrix(newrow, nrow = 1)
    colnames(newrow) <- colnames(x)
    
@@ -155,7 +188,7 @@ forecast.xgbts <- function(object,
   x <- object$x
   y <- object$y2
   for(i in 1:h){
-    tmp <- forward1(x, y, timepred = htime[i], model = object$model)  
+    tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg[i, ])  
     x <- tmp$x
     y <- tmp$y
   }
