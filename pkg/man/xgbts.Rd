@@ -5,7 +5,7 @@
 \title{xgboost time series modelling}
 \usage{
 xgbts(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 100,
-  nfold = 10, verbose = FALSE, ...)
+  cv = TRUE, nfold = 10, verbose = FALSE, ...)
 }
 \arguments{
 \item{y}{A univariate time series.}
@@ -14,7 +14,11 @@ xgbts(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 100,
 
 \item{maxlag}{The maximum number of lags of \code{y} and \code{xreg} (if included) to be considered as features.}
 
-\item{nrounds}{Maximum number of iterations in cross validation to determine.}
+\item{nrounds}{Maximum number of iterations \code{xgboost} will perform.  If \code{cv = TRUE}, the value 
+of \code{nrounds} passed to \code{xgboost} is chosen by cross-validation; if it is \code{FALSE} then 
+\code{nrounds} is passed straight through.}
+
+\item{cv}{Should cross-validation be used to choose the nrounds actually passed to xgboost? (recommended)}
 
 \item{nfold}{Number of equal size subsamples during cross validation.}
 

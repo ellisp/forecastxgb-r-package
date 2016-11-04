@@ -9,15 +9,18 @@
 #' @import stats
 #' @param y A univariate time series.
 #' @param xreg Optionally, a vector or matrix of external regressors, which must have the same number of rows as y.
-#' @param nrounds Maximum number of iterations in cross validation to determine.
+#' @param nrounds Maximum number of iterations \code{xgboost} will perform.  If \code{cv = TRUE}, the value 
+#' of \code{nrounds} passed to \code{xgboost} is chosen by cross-validation; if it is \code{FALSE} then 
+#' \code{nrounds} is passed straight through.
 #' @param nfold Number of equal size subsamples during cross validation.
 #' @param maxlag The maximum number of lags of \code{y} and \code{xreg} (if included) to be considered as features.
 #' @param verbose Passed on to \code{xgboost} and \code{xgb.cv}.
+#' @param cv Should cross-validation be used to choose the nrounds actually passed to xgboost? (recommended)
 #' @param ... Additional arguments passed to \code{xgboost}.
 #' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
 xgbts <- function(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 100, 
-                  nfold = 10, verbose = FALSE, ...){
+                  cv = TRUE, nfold = 10, verbose = FALSE, ...){
   # y <- AirPassengers
 
   # check y is a univariate time series
@@ -62,15 +65,18 @@ xgbts <- function(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 1
   colnames(x) <- c(paste0("lag", 1:maxlag), "time", paste0("season", 2:f))
   
   #---------------model fitting--------------------
-  message("Starting cross-validation")
-  cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
-               early.stop.round = 5, maximize = FALSE, verbose = verbose)
-  # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE
-  
-  best <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
-  
+  if(cv){
+    message("Starting cross-validation")
+    cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
+                 early.stop.round = 5, maximize = FALSE, verbose = verbose)
+    # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE
+    
+    nrounds_use <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
+  } else {
+    nrounds_use <- nrounds
+  }  
   message("Fitting xgboost model")
-  model <- xgboost(data = x, label = y2, nrounds = best, verbose = verbose, ...)
+  model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose, ...)
   
   output <- list(
     y = origy,
