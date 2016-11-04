@@ -21,13 +21,18 @@ xgbts <- function(y, xreg = NULL, maxlag = max(5, 2 * frequency(y)), nrounds = 1
   # y <- AirPassengers
 
   # check y is a univariate time series
-  
+  if(class(y) != "ts"){
+    stop("y must be a univariate time series")
+  }
   
   # check xreg, if it exists, is a numeric matrix
   if(!is.null(xreg)){
     warning("External regressors not yet implemented.  xreg will be ignored.")
+    if(!is.numeric(xreg) | !is.matrix(xreg)){
+      stop("xreg should be a numeric matrix")
+    }
   }
-  
+
   f <- stats::frequency(y)
   if(maxlag < f){
     stop("At least one full period of lags needed.")
