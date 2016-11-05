@@ -1,7 +1,11 @@
 # forecastxgb-r-package
 An R package for time series models and forecasts with xgboost compatible with {forecast} S3 classes
 
-Only on GitHub.  Very early days, incomplete.  Planned addition is support for `xreg`.
+[![Travis-CI Build Status](https://travis-ci.org/ellisp/forecastxgb-r-package.svg?branch=master)](https://travis-ci.org/ellisp/forecastxgb-r-package)
+[![CRAN version](http://www.r-pkg.org/badges/version/forecastxgb)](http://www.r-pkg.org/pkg/forecastxgb)
+[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/forecastxgb)](http://www.r-pkg.org/pkg/forecastxgb)
+
+Only on GitHub.  Very early days, still needs some thorough testing.  
 
 This implementation uses as features lagged values of the target variable, linear time, and dummy variables for seasons.
 
@@ -27,10 +31,6 @@ model <- xgbts(AirPassengers)
 
 ```
 ## Stopping. Best iteration: 53
-```
-
-```
-## Fitting xgboost model
 ```
 
 ```r
@@ -71,10 +71,6 @@ model <- xgbts(x)
 
 ```
 ## Stopping. Best iteration: 20
-```
-
-```
-## Fitting xgboost model
 ```
 
 ```r
@@ -153,10 +149,6 @@ obj <- xgbts(Nile)
 
 ```
 ## Stopping. Best iteration: 10
-```
-
-```
-## Fitting xgboost model
 ```
 
 ```r
