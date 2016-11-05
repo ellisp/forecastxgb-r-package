@@ -9,9 +9,42 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+The `forecastxgb` package provides time series modelling and forecasting functions, combining the machine learning approach of Chen, He and Benesty's [`xgboost` package](https://CRAN.R-project.org/package=xgboost) with the convenient handling of time series and familiar API of Rob Hyndman's [`forecast` package](http://github.com/robjhyndman/forecast).
 
-Hi there.
+## Basic usage
 
+The workhorse function is `xgbts`.  This fits a model to a time series.  It creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time. 
+```{r echo = FALSE}
+set.seed(123)
+```
+
+### Univariate
+
+Usage with default values is straightforward.  Here it is fit to Australian monthly gas production 1956-1995, an example dataset provided in `forecast`:
+```{r message = FALSE}
+library(forecastxgb)
+model <- xgbts(gas)
+```
+By default, `xgbts` uses row-wise cross-validation to determine the best number of rounds of iterations for the boosting algorithm without overfitting.  A final model is then fit on the full available dataset.  The relative importance of the various features in the model can be inspected by `importance_xgb()` or, more conveniently, the `summary` method for objects of class `xgbts`.
+
+
+```{r}
+summary(model)
+```
+We see in the case of the gas data that the most important feature in explaining gas production is the production 12 months previously; and then other features decrease in importance from there but still have an impact.
+
+Forecasting is the main purpose of this package, and a `forecast` method is supplied.  The resulting objects are of class `forecast` and familiar generic functions work with them.
+
+```{r}
+fc <- forecast(model, h = 12)
+plot(fc)
+```
+Note that prediction intervals are not currently available.
+
+### With external regressors
+External regressors can be added by using the `xreg` argument familiar from other forecast functions like `auto.arima` and `nnetar`.
+
+## Advanced usage
 
 ## Tourism forecasting competition
 Here is a more substantive example.  I use the 1,311 datasets from the 2010 Tourism Forecasting Competition described in
@@ -156,4 +189,8 @@ Tcomp_results %>%
 
 We see the overall best performing ensemble is the average of the Theta and ARIMA models - the two from the more traditional timeseries forecasting approach.  The two machine learning methods (neural network and extreme gradient boosting) are not as effective, at least in these implementations.  As individual methods, they are the two weakest, although the extreme gradient boosting method provided in `forecastxgb` performs noticeably better than `forecast::nnetar`.
 
-In combination with
+Theta by itself is the best performing with the annual data - simple methods work well when the dataset is small and highly aggregate.  The best that can be said of the `xgbts` approach in this context is that it doesn't damage the Theta method much when included in a combination - several of the better performing ensembles have `xgbts` as one of their members.  In contrast, the neural network models do badly with this collection of annual data.
+
+Adding `auto.arima` and `xgbts` to an ensemble of quarterly or monthly data definitely improves on Theta by itself.  The best performing single model for quarterly or monthly data is `auto.arima` followed by `thetaf`.  Again, neural networks are the poorest of the four individual models.
+
+Overall, I conclude that with univariate data, `xgbts` has little to add to an ensemble that already contains `auto.arima` and `thetaf` (or - not shown - the closely related `ets`).  I believe however that inclusion of `xreg` external regressors would shift the balance in favour of `xgbts` and maybe even `nnetar` - the more complex and larger the dataset, the better the chance that these methods will have something to offer.  If and when I find a large collection of timeseries competition data with external regressors I will probably add a second vignette, or at least a blog post at [http://ellisp.github.io](http://ellisp.github.io).

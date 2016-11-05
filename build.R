@@ -8,6 +8,6 @@ test("pkg")
 
 document("pkg")
 check("pkg")
-
+build_vignettes("pkg")
 build("pkg")
 
