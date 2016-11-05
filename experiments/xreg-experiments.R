@@ -8,7 +8,7 @@ names(fc1)
 fc$method
 
 fit2 <- xgbts(y = usconsumption[,1], xreg = matrix(usconsumption[,2], dimnames = list(NULL, "Income")))
-fit3 <- xgbts(usconsumption[,1])
+fit3 <- xgbts(y = usconsumption[,1])
 forecast(fit3)
 summary(fit2)
 fit2$origxreg

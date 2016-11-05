@@ -4,8 +4,7 @@
 \alias{forecast.xgbts}
 \title{Forecasting using xgboost models}
 \usage{
-\method{forecast}{xgbts}(object, h = ifelse(frequency(object$y) > 1, 2 *
-  frequency(object$y), 10), xreg = NULL, ...)
+\method{forecast}{xgbts}(object, h = NULL, xreg = NULL, ...)
 }
 \arguments{
 \item{object}{An object of class "\code{xgbts}".  Usuall the result of a call to \code{\link{xgbts}}.}

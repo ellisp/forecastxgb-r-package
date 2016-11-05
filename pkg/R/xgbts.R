@@ -164,6 +164,10 @@ forecast.xgbts <- function(object,
     message(paste("No h provided so forecasting forward", h, "periods."))
   }
   
+  # clear up space to avoid using an old xreg3 if it exists
+  if(is.null(xreg)){
+    xreg3 <- NULL
+  }
   
   f <- frequency(object$y)
   
