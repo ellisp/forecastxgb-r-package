@@ -1,0 +1,20 @@
+# thanks to https://github.com/travis-ci/travis-ci/issues/5775
+sudo: false
+
+language: r
+r:
+  - oldrel
+  - release
+  - devel
+
+cache: packages
+
+install:
+  - Rscript -e 'install.packages(c("devtools","roxygen2","testthat", "knitr", "rmarkdown", "xgboost", "forecast"));devtools::install_deps("pkg")'
+script:
+  - Rscript -e 'devtools::check("pkg")'
+  
+notifications:
+  email:
+    on_success: change
+    on_failure: change
