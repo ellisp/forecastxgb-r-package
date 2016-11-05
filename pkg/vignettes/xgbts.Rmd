@@ -17,7 +17,10 @@ The workhorse function is `xgbts`.  This fits a model to a time series.  Under t
 ```{r echo = FALSE, cache = FALSE}
 set.seed(123)
 library(knitr)
-opts_chunk$set(comment=NA, fig.width=7, fig.height=5, cache = FALSE)
+knit_hooks$set(mypar = function(before, options, envir) {
+    if (before) par(bty = "l", family = "serif")
+})
+opts_chunk$set(comment=NA, fig.width=7, fig.height=5, cache = FALSE, mypar = TRUE)
 ```
 
 ### Univariate
