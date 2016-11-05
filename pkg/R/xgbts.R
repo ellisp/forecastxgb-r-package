@@ -15,14 +15,17 @@
 #' @param nfold Number of equal size subsamples during cross validation.
 #' @param maxlag The maximum number of lags of \code{y} and \code{xreg} (if included) to be considered as features.
 #' @param verbose Passed on to \code{xgboost} and \code{xgb.cv}.
-#' @param cv Should cross-validation be used to choose the nrounds actually passed to xgboost? (recommended)
-#' @param ... Additional arguments passed to \code{xgboost}.
+#' @param nrounds_method Method used to determine the value of nrounds actually given for \code{xgboost} for 
+#' the final model.  Options are \code{"cv"} for row-wise cross-validation, \code{"v"} for validation on a testing
+#' set of the most recent 20 per cent of data, \code{"manual"} in which case \code{nrounds} is passed through directly.
+#' @param ... Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".
 #' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
 xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
-                  cv = TRUE, nfold = 10, verbose = FALSE, ...){
+                  nrounds_method = c("cv", "v", "manual"), nfold = 10, verbose = FALSE, ...){
   # y <- AirPassengers # for dev
 
+  nrounds_method = match.arg(nrounds_method)
   # check y is a univariate time series
   if(class(y) != "ts"){
     stop("y must be a univariate time series")
@@ -79,15 +82,18 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
   
   #---------------model fitting--------------------
-  if(cv){
+  if(nrounds_method == "cv"){
     message("Starting cross-validation")
     cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
-                 early.stop.round = 5, maximize = FALSE, verbose = verbose)
+                 early.stop.round = 5, maximize = FALSE, verbose = verbose, ...)
     # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE
     
     nrounds_use <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
-  } else {
+  } else {if(nrounds_method == "v"){
+      nrounds_use <- validate_xgbts(y, xreg = xreg, ...) $best_nrounds
+  } else { 
     nrounds_use <- nrounds
+      }
   }  
   if(verbose){message("Fitting xgboost model")}
   model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose, ...)
@@ -136,6 +142,7 @@ forecast.xgbts <- function(object,
     
     if(class(xreg) == "ts" | "data.frame" %in% class(xreg)){
       message("Converting xreg into a matrix")
+      # TODO - not sure this works when it's two dimensional
       xreg <- as.matrix(xreg)
     }
     

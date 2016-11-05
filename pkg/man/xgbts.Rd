@@ -5,7 +5,8 @@
 \title{xgboost time series modelling}
 \usage{
 xgbts(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
-  cv = TRUE, nfold = 10, verbose = FALSE, ...)
+  nrounds_method = c("cv", "v", "manual"), nfold = 10, verbose = FALSE,
+  ...)
 }
 \arguments{
 \item{y}{A univariate time series.}
@@ -18,13 +19,15 @@ xgbts(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
 of \code{nrounds} passed to \code{xgboost} is chosen by cross-validation; if it is \code{FALSE} then 
 \code{nrounds} is passed straight through.}
 
-\item{cv}{Should cross-validation be used to choose the nrounds actually passed to xgboost? (recommended)}
+\item{nrounds_method}{Method used to determine the value of nrounds actually given for \code{xgboost} for 
+the final model.  Options are \code{"cv"} for row-wise cross-validation, \code{"v"} for validation on a testing
+set of the most recent 20 per cent of data, \code{"manual"} in which case \code{nrounds} is passed through directly.}
 
 \item{nfold}{Number of equal size subsamples during cross validation.}
 
 \item{verbose}{Passed on to \code{xgboost} and \code{xgb.cv}.}
 
-\item{...}{Additional arguments passed to \code{xgboost}.}
+\item{...}{Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".}
 }
 \value{
 An object of class \code{xgbts}.

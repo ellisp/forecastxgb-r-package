@@ -7,8 +7,6 @@ Depends:
     R (>= 3.3.2),
     forecast,
     xgboost
-Imports:
-  parallel
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
