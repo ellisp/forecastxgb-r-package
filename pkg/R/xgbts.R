@@ -22,7 +22,8 @@
 #' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
 xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
-                  nrounds_method = c("cv", "v", "manual"), nfold = 10, verbose = FALSE, ...){
+                  nrounds_method = c("cv", "v", "manual"), 
+                  nfold = ifelse(length(y) > 30, 10, 5), verbose = FALSE, ...){
   # y <- AirPassengers # for dev
 
   nrounds_method = match.arg(nrounds_method)
@@ -85,7 +86,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   if(nrounds_method == "cv"){
     if(verbose){message("Starting cross-validation")}
     cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
-                 early.stop.round = 5, maximize = FALSE, verbose = verbose, ...)
+                 early.stop.round = 5, maximize = FALSE, verbose = verbose)
     # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE?
     
     nrounds_use <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))

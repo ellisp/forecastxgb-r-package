@@ -5,8 +5,8 @@
 \title{xgboost time series modelling}
 \usage{
 xgbts(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
-  nrounds_method = c("cv", "v", "manual"), nfold = 10, verbose = FALSE,
-  ...)
+  nrounds_method = c("cv", "v", "manual"), nfold = ifelse(length(y) > 30,
+  10, 5), verbose = FALSE, ...)
 }
 \arguments{
 \item{y}{A univariate time series.}

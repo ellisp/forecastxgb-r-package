@@ -42,8 +42,10 @@ competition <- function(collection){
               accuracy(fc134, thedata$xx)[2, 6],
               accuracy(fc234, thedata$xx)[2, 6],
               accuracy(fc1234, thedata$xx)[2, 6])
+    if(i %% 10 == 0){message(i)}
     mase
   }
+  message("Finished fitting models")
   colnames(mases) <- c("x", "f", "a", "n", "xf", "xa", "xn", "fa", "fn", "an",
                         "xfa", "xfn", "xan", "fan", "xfan")
   return(mases)
