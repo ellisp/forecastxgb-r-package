@@ -9,18 +9,31 @@
 #' @import stats
 #' @param y A univariate time series.
 #' @param xreg Optionally, a vector or matrix of external regressors, which must have the same number of rows as y.
-#' @param nrounds Maximum number of iterations \code{xgboost} will perform.  If \code{cv = TRUE}, the value 
-#' of \code{nrounds} passed to \code{xgboost} is chosen by cross-validation; if it is \code{FALSE} then 
-#' \code{nrounds} is passed straight through.
-#' @param nfold Number of equal size subsamples during cross validation.
+#' @param nrounds Maximum number of iterations \code{xgboost} will perform.  If \code{nrounds_method = 'cv'}, 
+#' the value of \code{nrounds} passed to \code{xgboost} is chosen by cross-validation; if it is \code{'v'} 
+#' then  the value of \code{nrounds} passed to \code{xgboost} is chosen by splitting the data into a training
+#' set (first 80 per cent) and test set (20 per cent) and choosing the number of iterations with the best value.
+#' If \code{nrounds_method = 'manual'} then \code{nrounds} iterations will be performed - unless you have chosen
+#' it carefully this is likely to lead to overfitting and poor forecasts.
+#' @param nfold Number of equal size subsamples during cross validation, used if \code{nrounds_method = 'cv'}.
 #' @param maxlag The maximum number of lags of \code{y} and \code{xreg} (if included) to be considered as features.
 #' @param verbose Passed on to \code{xgboost} and \code{xgb.cv}.
 #' @param nrounds_method Method used to determine the value of nrounds actually given for \code{xgboost} for 
 #' the final model.  Options are \code{"cv"} for row-wise cross-validation, \code{"v"} for validation on a testing
 #' set of the most recent 20 per cent of data, \code{"manual"} in which case \code{nrounds} is passed through directly.
 #' @param ... Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".
+#' @details This is the workhorse function for the \code{forecastxgb} package.
+#' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
+#' based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That 
+#' matrix is then fed as the feature set for \code{xgboost} to do its stuff.
 #' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
+#' @examples
+#' woolmod <- xgbts(woolyrnq)
+#' summary(woolmod)
+#' plot(woolmod)
+#' fc <- forecast(woolmod, h = 8)
+#' plot(fc)
 xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   nrounds_method = c("cv", "v", "manual"), 
                   nfold = ifelse(length(y) > 30, 10, 5), verbose = FALSE, ...){
@@ -29,7 +42,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   nrounds_method = match.arg(nrounds_method)
   
   # check y is a univariate time series
-  if(class(y) != "ts"){
+  if(!"ts" %in% class(y)){
     stop("y must be a univariate time series")
   }
   
@@ -152,6 +165,12 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
 #' @param ... Ignored.
 #' @return An object of class \code{forecast}
 #' @author Peter Ellis
+#' @examples
+#' # Australian monthly gas production
+#' gas_model <- xgbts(gas)
+#' summary(gas_model)
+#' gas_fc <- forecast(gas_model, h = 12)
+#' plot(gas_fc)
 forecast.xgbts <- function(object, 
                           h = NULL,
                           xreg = NULL, ...){

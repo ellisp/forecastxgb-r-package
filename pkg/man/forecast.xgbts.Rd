@@ -21,6 +21,13 @@ An object of class \code{forecast}
 \description{
 Returns forecasts and other information for xgboost timeseries modesl fit with \code{xbgts}
 }
+\examples{
+# Australian monthly gas production
+gas_model <- xgbts(gas)
+summary(gas_model)
+gas_fc <- forecast(gas_model, h = 12)
+plot(gas_fc)
+}
 \author{
 Peter Ellis
 }

@@ -15,4 +15,16 @@
 \description{
 summary method for an object created by xgbts
 }
+\examples{
+\dontrun{
+# Half-hourly electricity demand in England and Wales, takes a few minutes
+electricity_model <- xgbts(taylor)
+summary(electricity_model)
+electricity_fc <- forecast(electricity_model, h = 500)
+plot(electricity_fc)
+}
+}
+\author{
+Peter Ellis
+}
 

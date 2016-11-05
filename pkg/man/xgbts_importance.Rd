@@ -18,7 +18,10 @@ A \code{data.table} of the features used in the model with their average gain
 \description{
 This is a light wrapper for \code{xgboost::xbg.importance} to make it easier to use with objects of class \code{xgbts}
 }
+\author{
+Peter Ellis
+}
 \seealso{
-\code{\link[xgboost]{xgb.importance}}
+\code{\link[xgboost]{xgb.importance}}. \code{\link{summary.xgbts}}
 }
 

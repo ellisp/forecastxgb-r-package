@@ -15,15 +15,18 @@ xgbts(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
 
 \item{maxlag}{The maximum number of lags of \code{y} and \code{xreg} (if included) to be considered as features.}
 
-\item{nrounds}{Maximum number of iterations \code{xgboost} will perform.  If \code{cv = TRUE}, the value 
-of \code{nrounds} passed to \code{xgboost} is chosen by cross-validation; if it is \code{FALSE} then 
-\code{nrounds} is passed straight through.}
+\item{nrounds}{Maximum number of iterations \code{xgboost} will perform.  If \code{nrounds_method = 'cv'}, 
+the value of \code{nrounds} passed to \code{xgboost} is chosen by cross-validation; if it is \code{'v'} 
+then  the value of \code{nrounds} passed to \code{xgboost} is chosen by splitting the data into a training
+set (first 80 per cent) and test set (20 per cent) and choosing the number of iterations with the best value.
+If \code{nrounds_method = 'manual'} then \code{nrounds} iterations will be performed - unless you have chosen
+it carefully this is likely to lead to overfitting and poor forecasts.}
 
 \item{nrounds_method}{Method used to determine the value of nrounds actually given for \code{xgboost} for 
 the final model.  Options are \code{"cv"} for row-wise cross-validation, \code{"v"} for validation on a testing
 set of the most recent 20 per cent of data, \code{"manual"} in which case \code{nrounds} is passed through directly.}
 
-\item{nfold}{Number of equal size subsamples during cross validation.}
+\item{nfold}{Number of equal size subsamples during cross validation, used if \code{nrounds_method = 'cv'}.}
 
 \item{verbose}{Passed on to \code{xgboost} and \code{xgb.cv}.}
 
@@ -34,6 +37,19 @@ An object of class \code{xgbts}.
 }
 \description{
 Fit a model to a time series using xgboost
+}
+\details{
+This is the workhorse function for the \code{forecastxgb} package.
+It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
+based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That 
+matrix is then fed as the feature set for \code{xgboost} to do its stuff.
+}
+\examples{
+woolmod <- xgbts(woolyrnq)
+summary(woolmod)
+plot(woolmod)
+fc <- forecast(woolmod, h = 8)
+plot(fc)
 }
 \author{
 Peter Ellis

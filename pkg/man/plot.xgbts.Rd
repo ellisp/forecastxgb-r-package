@@ -14,4 +14,11 @@
 \description{
 plot method for an object created by xgbts
 }
+\examples{
+model <- xgbts(AirPassengers)
+plot(model)
+}
+\author{
+Peter Ellis
+}
 

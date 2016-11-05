@@ -6,7 +6,8 @@
 #' @param ... Extra parameters passed through to \code{xgb.importance}
 #' @return A \code{data.table} of the features used in the model with their average gain 
 #' (and their weight for boosted tree model) in the model.
-#' @seealso \code{\link[xgboost]{xgb.importance}}
+#' @seealso \code{\link[xgboost]{xgb.importance}}. \code{\link{summary.xgbts}}
+#' @author Peter Ellis
 xgbts_importance <- function(object, ...){
   if(class(object) != "xgbts"){
     stop("'object' should be an object of class xgbts.")
@@ -21,6 +22,15 @@ xgbts_importance <- function(object, ...){
 #' @export
 #' @param object An object created by \code{xgbts}
 #' @param ... Ignored.
+#' @author Peter Ellis
+#' @examples
+#' \dontrun{
+#' # Half-hourly electricity demand in England and Wales, takes a few minutes
+#' electricity_model <- xgbts(taylor)
+#' summary(electricity_model)
+#' electricity_fc <- forecast(electricity_model, h = 500)
+#' plot(electricity_fc)
+#' }
 summary.xgbts <- function(object, ...){
   ans <- object
   ans$importance <- xgbts_importance(object)
@@ -52,6 +62,10 @@ print.summary.xgbts <- function(x, ...){
 #' @method plot xgbts
 #' @param x An object created by \code{xgbts}
 #' @param ... Additional arguments passed through to \code{plot()}
+#' @author Peter Ellis
+#' @examples
+#' model <- xgbts(AirPassengers)
+#' plot(model)
 plot.xgbts <- function(x, ...){
   ts.plot(x$y, col = "brown", ...)
   lines(x$fitted, col = "blue")
@@ -64,7 +78,7 @@ plot.xgbts <- function(x, ...){
 #' Summary data from four models, and 11 combinations of models, against the data from the 2010 tourism forecasting competition.
 #' 
 #' Full details of how this was generated are in the Vignette.  This shows the average mean absolute scaled error 
-#' (MASE) from using `xgbts` (x), `auto.arima` (a), `nnetar` (n) and `thetaf` (f) to generate forecasts of 1,311 tourism data series.
+#' (MASE) from using \code{xgbts} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to generate forecasts of 1,311 tourism data series.
 #' 
 #' 
 #' \itemize{
@@ -73,6 +87,7 @@ plot.xgbts <- function(x, ...){
 #' \item Frequency The frequency of the subset of data from which the mean MASE was calculated.
 #' }
 #' @format A data frame with 60 rows and three columns.
+#' @author Peter Ellis
 #' @examples
 #' if(require(ggplot2)){
 #' leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
@@ -90,3 +105,7 @@ plot.xgbts <- function(x, ...){
 #'   theme_grey(9)
 #'   }
 "Tcomp_results"
+
+
+
+

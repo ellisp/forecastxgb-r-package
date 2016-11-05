@@ -13,7 +13,7 @@ Summary data from four models, and 11 combinations of models, against the data f
 }
 \details{
 Full details of how this was generated are in the Vignette.  This shows the average mean absolute scaled error 
-(MASE) from using `xgbts` (x), `auto.arima` (a), `nnetar` (n) and `thetaf` (f) to generate forecasts of 1,311 tourism data series.
+(MASE) from using \code{xgbts} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to generate forecasts of 1,311 tourism data series.
 
 \itemize{
 \item MASE A mean mean absolute squared error
@@ -37,6 +37,9 @@ ggplot(Tcomp_results, aes(x = model, y =  MASE, colour = Frequency, label = mode
   y = "Mean scaled absolute error\\n(smaller numbers are better)") +
   theme_grey(9)
   }
+}
+\author{
+Peter Ellis
 }
 \keyword{datasets}
 
