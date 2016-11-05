@@ -1,3 +1,22 @@
+---
+title: "Extreme gradient boosting time series forecasting"
+author: "Peter Ellis"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Extreme gradient boosting time series forecasting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+Hi there.
+
+
+## Tourism forecasting competition
+
+
+```{r cache = FALSE, results = 'hide', message = FALSE}
 
 #=============prep======================
 library(Tcomp)
@@ -64,60 +83,15 @@ competition <- function(collection, maxfors = length(collection)){
                         "xfa", "xfn", "xan", "fan", "xfan")
   return(mases)
 }
+```
 
-
-
+```{r message = FALSE}
 ## Test on a small set of data, useful during dev
-# small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], tourism[[4]], tourism[[5]], tourism[[6]])
-# test1 <- competition(small_collection)
-
-
-#========Fit models==============
-system.time(t1  <- competition(subset(tourism, "yearly")))
-system.time(t4 <- competition(subset(tourism, "quarterly")))
-system.time(t12 <- competition(subset(tourism, "monthly")))
-
-# shut down cluster to avoid any mess:
-stopCluster(cluster)
-
-
-#==============present results================
-results <- c(apply(t1, 2, mean),
-             apply(t4, 2, mean),
-             apply(t12, 2, mean))
-
-results_df <- data.frame(MASE = results)
-results_df$model <- as.character(names(results))
-periods <- c("Annual", "Quarterly", "Monthly")
-results_df$Frequency <- rep.int(periods, times = c(15, 15, 15))
-
-best <- results_df %>%
-  group_by(model) %>%
-  summarise(MASE = mean(MASE)) %>%
-  arrange(MASE) %>%
-  mutate(Frequency = "Average")
-
-Tcomp_results <- results_df %>%
-  rbind(best) %>%
-  mutate(model = factor(model, levels = best$model)) %>%
-  mutate(Frequency = factor(Frequency, levels = c("Annual", "Average", "Quarterly", "Monthly")))
-
-leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
-n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
-
-save(Tcomp_results, file = "pkg/data/Tcomp_results.rda")
-
-Tcomp_results %>%
-  ggplot(aes(x = model, y =  MASE, colour = Frequency, label = model)) +
-  geom_text(size = 6) +
-  geom_line(aes(x = as.numeric(model)), alpha = 0.25) +
-  scale_y_continuous("Mean scaled absolute error\n(smaller numbers are better)") +
-  annotate("text", x = 2, y = 3.5, label = leg, hjust = 0) +
-  ggtitle("Average error of four different timeseries forecasting methods\n2010 Tourism Forecasting Competition data") +
-  labs(x = "Model, or ensemble of models\n(further to the left means better overall performance)")
-
-
-
-# the results for Theta and ARIMA match those at
-# https://cran.r-project.org/web/packages/Tcomp/vignettes/tourism-comp.html
+small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], 
+                         tourism[[4]], tourism[[5]], tourism[[6]])
+test1 <- competition(small_collection)
+rownames(test1) <- paste0("d", 1:6)
+# Print out the average mean absolute scaled error (MASE) for each dataset/ensemble combo:
+round(test1, 2)
+```
 
