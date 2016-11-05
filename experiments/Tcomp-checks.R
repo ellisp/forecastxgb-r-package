@@ -1,14 +1,25 @@
 
 library(Tcomp)
 library(foreach)
+library(doParallel)
 library(forecastxgb)
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(forcats)
+library(RColorBrewer)
 
-small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], tourism[[4]], tourism[[5]], tourism[[6]])
+cluster <- makeCluster(7)
+registerDoParallel(cluster)
 
+clusterEvalQ(cluster, {
+  library(Tcomp)
+  library(forecastxgb)
+})
 
-competition <- function(collection){
+competition <- function(collection, maxfors = length(collection)){
   nseries <- length(collection)
-  mases <- foreach(i = 1:nseries, .combine = "rbind") %dopar% {
+  mases <- foreach(i = 1:maxfors, .combine = "rbind") %dopar% {
     thedata <- collection[[i]]  
     mod1 <- xgbts(thedata$x)
     fc1 <- forecast(mod1, h = thedata$h)
@@ -42,7 +53,6 @@ competition <- function(collection){
               accuracy(fc134, thedata$xx)[2, 6],
               accuracy(fc234, thedata$xx)[2, 6],
               accuracy(fc1234, thedata$xx)[2, 6])
-    if(i %% 10 == 0){message(i)}
     mase
   }
   message("Finished fitting models")
@@ -51,13 +61,47 @@ competition <- function(collection){
   return(mases)
 }
 
+
+# small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], tourism[[4]], tourism[[5]], tourism[[6]])
 test1 <- competition(small_collection)
+
+
 
 system.time(t1  <- competition(subset(tourism, "yearly")))
 system.time(t4 <- competition(subset(tourism, "quarterly")))
 system.time(t12 <- competition(subset(tourism, "monthly")))
 
-cbind(sort(apply(test1, 2, mean)))
-apply(t1, 2, mean)
-apply(t4, 2, mean)
-apply(t12, 2, mean)
+stopCluster(cluster)
+
+
+#==============present results================
+results <- c(apply(t1, 2, mean),
+             apply(t4, 2, mean),
+             apply(t12, 2, mean))
+
+results_df <- data.frame(MASE = results)
+results_df$model <- as.character(names(results))
+periods <- c("Annual", "Quarterly", "Monthly")
+results_df$frequency <- factor(rep.int(periods, times = c(15, 15, 15)), levels = periods)
+
+best <- results_df %>%
+  group_by(model) %>%
+  summarise(MASE = mean(MASE)) %>%
+  arrange(MASE) %>%
+  mutate(frequency = "average")
+
+results_df %>%
+  rbind(best) %>%
+  mutate(model = factor(model, levels = best$model)) %>%
+  ggplot(aes(x = frequency, y = MASE, colour = model, label = model)) +
+  geom_text(aes(x = frequency)) +
+  geom_line(aes(x = as.numeric(frequency))) +
+  geom_text(aes(x = frequency)) +
+  theme(legend.position = "none") +
+  scale_y_continuous("Mean scaled absolute error - smaller numbers are better", trans = "reverse")
+
+# the yearly results are different from those at 
+# https://cran.r-project.org/web/packages/Tcomp/vignettes/tourism-comp.html
+# but the monthly and quarterly ones match.
+
+

@@ -27,6 +27,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   # y <- AirPassengers # for dev
 
   nrounds_method = match.arg(nrounds_method)
+  
   # check y is a univariate time series
   if(class(y) != "ts"){
     stop("y must be a univariate time series")
@@ -54,7 +55,13 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   origxreg <- xreg
   n <- orign - maxlag
   y2 <- ts(origy[-(1:(maxlag))], start = time(origy)[maxlag + 1], frequency = f)
+
+  if(nrounds_method == "cv" & n < 15){
+    warning("y is too short for cross-validation.  Will validate on the most recent 20 per cent instead.")
+    nrounds_method <- "v"
+  }
   
+    
   #----------------------------creating x--------------------
   # create lagged versions of y to be part of x
   x <- matrix(0, nrow = n, ncol = maxlag + f)
