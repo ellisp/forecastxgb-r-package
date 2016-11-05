@@ -9,13 +9,15 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-The `forecastxgb` package provides time series modelling and forecasting functions, combining the machine learning approach of Chen, He and Benesty's [`xgboost` package](https://CRAN.R-project.org/package=xgboost) with the convenient handling of time series and familiar API of Rob Hyndman's [`forecast` package](http://github.com/robjhyndman/forecast).
+The `forecastxgb` package provides time series modelling and forecasting functions that combine the machine learning approach of Chen, He and Benesty's [`xgboost`](https://CRAN.R-project.org/package=xgboost) with the convenient handling of time series and familiar API of Rob Hyndman's [`forecast`](http://github.com/robjhyndman/forecast).  It applies to time series the Extreme Gradient Boosting proposed in [*Greedy Function Approximation: A Gradient Boosting Machine*, by Jermoe Friedman in 2001](http://www.jstor.org/stable/2699986). xgboost has become an important machine learning algorithm; nicely explained in [this accessible documentation](http://xgboost.readthedocs.io/en/latest/model.html).
 
 ## Basic usage
 
-The workhorse function is `xgbts`.  This fits a model to a time series.  It creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time. 
-```{r echo = FALSE}
+The workhorse function is `xgbts`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
+```{r echo = FALSE, cache = FALSE}
 set.seed(123)
+library(knitr)
+opts_chunk$set(comment=NA, fig.width=7, fig.height=5, cache = FALSE)
 ```
 
 ### Univariate
@@ -25,6 +27,8 @@ Usage with default values is straightforward.  Here it is fit to Australian mont
 library(forecastxgb)
 model <- xgbts(gas)
 ```
+(Note: the "Stopping. Best iteration..." to the screen is produced by `xgboost::xgb.cv`, which uses `cat()` rather than `message()` to print information on its processing.)
+
 By default, `xgbts` uses row-wise cross-validation to determine the best number of rounds of iterations for the boosting algorithm without overfitting.  A final model is then fit on the full available dataset.  The relative importance of the various features in the model can be inspected by `importance_xgb()` or, more conveniently, the `summary` method for objects of class `xgbts`.
 
 
@@ -42,9 +46,40 @@ plot(fc)
 Note that prediction intervals are not currently available.
 
 ### With external regressors
-External regressors can be added by using the `xreg` argument familiar from other forecast functions like `auto.arima` and `nnetar`.
+External regressors can be added by using the `xreg` argument familiar from other forecast functions like `auto.arima` and `nnetar`.  `xreg` can be a vector or `ts` object but is easiest to integrate into the analysis if it is a matrix (even a matrix with one column) with well-chosen column names; that way feature names persist meaningfully.  
+
+The example below, with data taken from the `fpp` package supporting Athanasopoulos and Hyndman's [Forecasting Principles and Practice](https://www.otexts.org/fpp) book, shows income being used to explain consumption.  In the same way that the response variable `y` is expanded into lagged versions of itself, each column in `xreg` is expanded into lagged versions, which are then treated as individual features for `xgboost`.
+
+```{r message = FALSE}
+library(fpp)
+consumption <- usconsumption[ ,1]
+income <- matrix(usconsumption[ ,2], dimnames = list(NULL, "Income"))
+consumption_model <- xgbts(y = consumption, xreg = income)
+summary(consumption_model)
+```
+We see that the two most important features explaining consumption are the two previous quarters' values of consumption; followed by the income in this quarter; and so on.
+
+
+The challenge of using external regressors in a forecasting environment is that to forecast, you need values of the future external regressors.  One way this is sometimes done is by first forecasting the individual regressors.  In the example below we do this, making sure the data structure is the same as the original `xreg`.  When the new value of `xreg` is given to `forecast`, it forecasts forward the number of rows of the new `xreg`.  
+```{r}
+income_future <- matrix(forecast(xgbts(usconsumption[,2]), h = 10)$mean, 
+                        dimnames = list(NULL, "Income"))
+plot(forecast(consumption_model, xreg = income_future))
+```
+
 
 ## Advanced usage
+The default settings for `xgbts` give reasonable results.  The key things that can be changed by the user include:
+
+- the maximum number of lags to include as explanatory variables.  There is a trade-off here, as each number higher this gets, the less rows of data you have.  Generally at least two full seasonal cycles are desired, and the default is `max(8, 2 * frequency(y))`.  When the data gets very short this value is sometimes forced lower, with a warning.
+- the method for choosing the maximum number of boosting iterations.  The default is row-wise cross validation, after the matrix of lagged explanatory variables has been created.  This is not a traditional approach for cross validation of time series, because the resampling does not preserve the original ordering.  However, the presence of the lagged values means this is less of an issue.  The main alternative (`nrounds_method = "v"`) is to set aside the final 20% of data and use that for validation of the various numbers of rounds of iterations of the first 80% of training data.   Experiments so far suggest that both methods give similar results; if anything the cross-validation method generally recommends a slightly lower number of iterations than does the alternative.
+
+## Future developments
+Future work might include: 
+
+* additional automated time-dependent features (eg dummy variables for trading days, Easter, etc)
+* ability to include xreg values that don't get lagged
+* some kind of automated multiple variable forecasting, similar to a vector-autoregression.
 
 ## Tourism forecasting competition
 Here is a more substantive example.  I use the 1,311 datasets from the 2010 Tourism Forecasting Competition described in
