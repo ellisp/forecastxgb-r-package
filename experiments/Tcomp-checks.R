@@ -20,6 +20,9 @@ clusterEvalQ(cluster, {
 
 #===============the actual analytical function==============
 competition <- function(collection, maxfors = length(collection)){
+  if(class(collection) != "Mcomp"){
+    stop("This function only works on objects of class Mcomp, eg from the Mcomp or Tcomp packages.")
+  }
   nseries <- length(collection)
   mases <- foreach(i = 1:maxfors, .combine = "rbind") %dopar% {
     thedata <- collection[[i]]  
@@ -68,8 +71,9 @@ competition <- function(collection, maxfors = length(collection)){
 
 
 ## Test on a small set of data, useful during dev
-# small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], tourism[[4]], tourism[[5]], tourism[[6]])
-# test1 <- competition(small_collection)
+small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], tourism[[4]], tourism[[5]], tourism[[6]])
+class(small_collection) <- "Mcomp"
+test1 <- competition(small_collection)
 
 
 #========Fit models==============
@@ -102,10 +106,10 @@ Tcomp_results <- results_df %>%
   mutate(model = factor(model, levels = best$model)) %>%
   mutate(Frequency = factor(Frequency, levels = c("Annual", "Average", "Quarterly", "Monthly")))
 
+save(Tcomp_results, file = "pkg/data/Tcomp_results.rda")
+
 leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
 n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
-
-save(Tcomp_results, file = "pkg/data/Tcomp_results.rda")
 
 Tcomp_results %>%
   ggplot(aes(x = model, y =  MASE, colour = Frequency, label = model)) +

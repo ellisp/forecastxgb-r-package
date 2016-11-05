@@ -1,6 +1,6 @@
 Package: forecastxgb
 Title: Time Series Models and Forecasts using "xgboost"
-Version: 0.0.4.9000
+Version: 0.0.5.9000
 Authors@R: person("Peter", "Ellis", email = "peter.ellis2013nz@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends:
@@ -14,5 +14,11 @@ RoxygenNote: 5.0.1
 Suggests:
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    Tcomp,
+    foreach,
+    doParallel,
+    dplyr,
+    ggplot2,
+    scales
 VignetteBuilder: knitr

@@ -1,7 +1,7 @@
 ---
 title: "Extreme gradient boosting time series forecasting"
 author: "Peter Ellis"
-date: "`r Sys.Date()`"
+date: "6 November 2016"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Extreme gradient boosting time series forecasting}
@@ -14,10 +14,20 @@ Hi there.
 
 
 ## Tourism forecasting competition
+Here is a more substantive example.  I use the 1,311 datasets from the 2010 Tourism Forecasting Competition described in
+ in [Athanasopoulos et al (2011)](http://robjhyndman.com/papers/forecompijf.pdf), originally in the International Journal of Forecasting (2011) 27(3), 822-844.  The data are available in the CRAN package [Tcomp](https://cran.r-project.org/package=Tcomp).  Each data object is a list, with elements inlcuding `x` (the original training data), `h` (the forecasting period) and `xx` (the test data of length `h`).  Only univariate time series are included.
+ 
+To give the `xgbts` model a good test, I am going to compare its performance in forecasting the 1,311 `xx` time series from the matching `x` series with three other modelling approaches:
 
+- Auto-regressive integrated moving average (ARIMA)
+- Theta
+- Neural networks
 
-```{r cache = FALSE, results = 'hide', message = FALSE}
+Those three are all from Rob Hyndman's `forecast` package.  I am also going to look at the performance of ensembles of the four model types.  With all combinations this means 15 models in total.
 
+Because all four models use the `forecast` paradigm it is relatively straightforward to structure the analysis.  The code below is a little repetitive but should be fairly transparent.  Because of the scale and the embarrassingly parallel nature of the work (ie no particular reason to do it in any particular order, so easy to split into tasks for different processes to do in parallel), I use `foreach` and `doParallel` to make the best use of my 8 logical processors.  The code below sets up a cluster for the parallel computing and a function `competition` which will work on any object of class `Mcomp`, which `Tcomp` inherits from the `Mcomp` package providing the first three "M" forecasting competition data collections.
+
+```{r message = FALSE}
 #=============prep======================
 library(Tcomp)
 library(foreach)
@@ -26,7 +36,8 @@ library(forecastxgb)
 library(dplyr)
 library(ggplot2)
 library(scales)
-
+```
+```{r eval = FALSE}
 #============set up cluster for parallel computing===========
 cluster <- makeCluster(7) # only any good if you have at least 7 processors :)
 registerDoParallel(cluster)
@@ -39,6 +50,9 @@ clusterEvalQ(cluster, {
 
 #===============the actual analytical function==============
 competition <- function(collection, maxfors = length(collection)){
+  if(class(collection) != "Mcomp"){
+    stop("This function only works on objects of class Mcomp, eg from the Mcomp or Tcomp packages.")
+  }
   nseries <- length(collection)
   mases <- foreach(i = 1:maxfors, .combine = "rbind") %dopar% {
     thedata <- collection[[i]]  
@@ -85,13 +99,61 @@ competition <- function(collection, maxfors = length(collection)){
 }
 ```
 
-```{r message = FALSE}
-## Test on a small set of data, useful during dev
-small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], 
-                         tourism[[4]], tourism[[5]], tourism[[6]])
-test1 <- competition(small_collection)
-rownames(test1) <- paste0("d", 1:6)
-# Print out the average mean absolute scaled error (MASE) for each dataset/ensemble combo:
-round(test1, 2)
+Applying this function to the three different subsets of tourism data (by different frequency) is straightforward but takes a few minutes to run:
+
+```{r eval = FALSE}
+#========Fit models==============
+system.time(t1  <- competition(subset(tourism, "yearly")))
+system.time(t4 <- competition(subset(tourism, "quarterly")))
+system.time(t12 <- competition(subset(tourism, "monthly")))
+
+# shut down cluster to avoid any mess:
+stopCluster(cluster)
 ```
 
+The `competition` function returns the mean absolute scaled error (MASE) of every model combination for every dataset.  The following code creates a summary object from the objects `t1`, `t4` and `t12` that hold those individual results:
+
+```{r eval = FALSE}
+#==============present results================
+results <- c(apply(t1, 2, mean),
+             apply(t4, 2, mean),
+             apply(t12, 2, mean))
+
+results_df <- data.frame(MASE = results)
+results_df$model <- as.character(names(results))
+periods <- c("Annual", "Quarterly", "Monthly")
+results_df$Frequency <- rep.int(periods, times = c(15, 15, 15))
+
+best <- results_df %>%
+  group_by(model) %>%
+  summarise(MASE = mean(MASE)) %>%
+  arrange(MASE) %>%
+  mutate(Frequency = "Average")
+
+Tcomp_results <- results_df %>%
+  rbind(best) %>%
+  mutate(model = factor(model, levels = best$model)) %>%
+  mutate(Frequency = factor(Frequency, levels = c("Annual", "Average", "Quarterly", "Monthly")))
+```
+
+The resulting object, `Tcomp_results`, is provided with the `forecastxgb` package.  Visual inspection shows that the average values of MASE provided for the Theta and ARIMA models match those in the [`Tcomp` vignette](https://cran.r-project.org/web/packages/Tcomp/vignettes/tourism-comp.html).  The results are easiest to understand graphically.
+
+```{r, fig.width = 8, fig.height = 6}
+leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
+n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
+
+Tcomp_results %>%
+  ggplot(aes(x = model, y =  MASE, colour = Frequency, label = model)) +
+  geom_text(size = 4) +
+  geom_line(aes(x = as.numeric(model)), alpha = 0.25) +
+  scale_y_continuous("Mean scaled absolute error\n(smaller numbers are better)") +
+  annotate("text", x = 2, y = 3.5, label = leg, hjust = 0) +
+  ggtitle("Average error of four different timeseries forecasting methods\n2010 Tourism Forecasting Competition data") +
+  labs(x = "Model, or ensemble of models\n(further to the left means better overall performance)") +
+  theme_grey(9)
+```
+
+
+We see the overall best performing ensemble is the average of the Theta and ARIMA models - the two from the more traditional timeseries forecasting approach.  The two machine learning methods (neural network and extreme gradient boosting) are not as effective, at least in these implementations.  As individual methods, they are the two weakest, although the extreme gradient boosting method provided in `forecastxgb` performs noticeably better than `forecast::nnetar`.
+
+In combination with
