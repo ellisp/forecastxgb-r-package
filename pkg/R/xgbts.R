@@ -47,6 +47,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
   orign <- length(y)
   origy <- y
+  origxreg <- xreg
   n <- orign - maxlag
   y2 <- ts(origy[-(1:(maxlag))], start = time(origy)[maxlag + 1], frequency = f)
   
@@ -102,7 +103,8 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     maxlag = maxlag
   )
   if(!is.null(xreg)){
-    output$ncolxreg <- ncol(xreg)
+    output$ origxreg = origxreg
+    output$ncolxreg <- ncol(origxreg)
   }
   class(output) <- "xgbts"
   return(output)
@@ -149,11 +151,12 @@ forecast.xgbts <- function(object,
       warning(paste("Ignoring h and forecasting", nrow(xreg), "periods from xreg."))
     }
     
-    # add the lagged versions of xreg
-    xreg <- lagvm(xreg)
-    
+    # add the lagged versions of xreg.  Some of the lags need to come from the original data
     h <- nrow(xreg)
-    
+    xreg2 <- lagvm(rbind(xreg, object$origxreg), maxlag = object$maxlag)
+    # we just want the last h rows of that big matrix:
+    nn <- nrow(xreg2)
+    xreg3 <- xreg2[(nn - h + 1):nn, ]
   } 
   
   if(is.null(h)){
@@ -197,7 +200,7 @@ forecast.xgbts <- function(object,
   x <- object$x
   y <- object$y2
   for(i in 1:h){
-    tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg[i, ])  
+    tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg3[i, ])  
     x <- tmp$x
     y <- tmp$y
   }
