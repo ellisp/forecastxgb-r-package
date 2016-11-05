@@ -14,11 +14,13 @@ summary(fit2)
 fit2$origxreg
 
 
-income_future <- matrix(forecast(usconsumption[,2], h = 10)$mean, dimnames = list(NULL, "Income"))
-fc2 <- forecast(object = fit2, xreg = income_future, h = 4)# should be a warning
+income_future <- matrix(forecast(xgbts(usconsumption[,2]), h = 10)$mean, dimnames = list(NULL, "Income"))
+
+fc2 <- forecast(object = fit2, xreg = income_future)
+plot(fc2)
+
 fc3 <- forecast(fit3)
 plot(fit2)
-plot(fc2)
 plot(fc3)
 names(fc2)
 fc2$method

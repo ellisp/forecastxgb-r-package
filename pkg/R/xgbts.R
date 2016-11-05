@@ -89,7 +89,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   } else {
     nrounds_use <- nrounds
   }  
-  message("Fitting xgboost model")
+  if(verbose){message("Fitting xgboost model")}
   model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose, ...)
   
   output <- list(
