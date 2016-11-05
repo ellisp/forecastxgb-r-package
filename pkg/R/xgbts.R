@@ -27,6 +27,7 @@
 #' based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That 
 #' matrix is then fed as the feature set for \code{xgboost} to do its stuff.
 #' @return An object of class \code{xgbts}.
+#' @seealso \code{\link{summary.xgbts}}, \code{\link{plot.xgbts}}, \code{\link{forecast.xgbts}}, \code{\link{xgbts_importance}}.
 #' @author Peter Ellis
 #' @examples
 #' # Univariate example - quarterly production of woolen yarn in Australia
@@ -174,6 +175,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
 #' @param ... Ignored.
 #' @return An object of class \code{forecast}
 #' @author Peter Ellis
+#' @seealso \code{\link{xgbts}}, \code{\link[forecast]{forecast}}
 #' @examples
 #' # Australian monthly gas production
 #' gas_model <- xgbts(gas)

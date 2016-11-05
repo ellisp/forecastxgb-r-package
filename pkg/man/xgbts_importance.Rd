@@ -22,6 +22,6 @@ This is a light wrapper for \code{xgboost::xbg.importance} to make it easier to 
 Peter Ellis
 }
 \seealso{
-\code{\link[xgboost]{xgb.importance}}. \code{\link{summary.xgbts}}
+\code{\link[xgboost]{xgb.importance}}, \code{\link{summary.xgbts}}, \code{\link{xgbts}}.
 }
 

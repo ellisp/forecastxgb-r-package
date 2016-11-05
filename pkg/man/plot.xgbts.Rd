@@ -21,4 +21,7 @@ plot(model)
 \author{
 Peter Ellis
 }
+\seealso{
+\code{\link{xgbts}}
+}
 

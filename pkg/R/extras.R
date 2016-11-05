@@ -6,7 +6,7 @@
 #' @param ... Extra parameters passed through to \code{xgb.importance}
 #' @return A \code{data.table} of the features used in the model with their average gain 
 #' (and their weight for boosted tree model) in the model.
-#' @seealso \code{\link[xgboost]{xgb.importance}}. \code{\link{summary.xgbts}}
+#' @seealso \code{\link[xgboost]{xgb.importance}}, \code{\link{summary.xgbts}}, \code{\link{xgbts}}.
 #' @author Peter Ellis
 xgbts_importance <- function(object, ...){
   if(class(object) != "xgbts"){
@@ -20,9 +20,10 @@ xgbts_importance <- function(object, ...){
 #' summary method for an object created by xgbts
 #' @aliases print.summary.xgbts
 #' @export
-#' @param object An object created by \code{xgbts}
+#' @param object An object created by \code{\link{xgbts}}
 #' @param ... Ignored.
 #' @author Peter Ellis
+#' @seealso  \code{\link{xgbts}}
 #' @examples
 #' \dontrun{
 #' # Half-hourly electricity demand in England and Wales, takes a few minutes
@@ -63,6 +64,7 @@ print.summary.xgbts <- function(x, ...){
 #' @param x An object created by \code{xgbts}
 #' @param ... Additional arguments passed through to \code{plot()}
 #' @author Peter Ellis
+#' @seealso  \code{\link{xgbts}}
 #' @examples
 #' model <- xgbts(AirPassengers)
 #' plot(model)
@@ -107,5 +109,40 @@ plot.xgbts <- function(x, ...){
 "Tcomp_results"
 
 
+
+#' M3 forecasting results
+#' 
+#' Summary data from four models, and 11 combinations of models, against the data from the M3 forecasting competition.
+#' 
+#' Full details are in the vignette of how a similar series with tourism competition data was generated.  
+#' The data shows the average mean absolute scaled error 
+#' (MASE) from using \code{xgbts} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to 
+#' generate forecasts of 3,003 data series from a range of sectors, in the M3 forecasting competition.
+#' 
+#' 
+#' \itemize{
+#' \item MASE A mean mean absolute squared error
+#' \item model model, or ensemble of models, to which the MASE applies
+#' \item Frequency The frequency of the subset of data from which the mean MASE was calculated.
+#' }
+#' @format A data frame with 75 rows and three columns.
+#' @author Peter Ellis
+#' @examples
+#' if(require(ggplot2)){
+#' leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
+#' n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
+#' 
+#' ggplot(Mcomp_results, aes(x = model, y =  MASE, colour = Frequency, label = model)) +
+#'   geom_text(size = 4) +
+#'   geom_line(aes(x = as.numeric(model)), alpha = 0.25) +
+#'   annotate("text", x = 2, y = 3.5, label = leg, hjust = 0) +
+#'   ggtitle("Average error of four different timeseries forecasting methods
+#'M3 Forecasting Competition data") +
+#'   labs(x = "Model, or ensemble of models
+#'(further to the left means better overall performance)",
+#'   y = "Mean scaled absolute error\n(smaller numbers are better)") +
+#'   theme_grey(9)
+#'   }
+"Mcomp_results"
 
 

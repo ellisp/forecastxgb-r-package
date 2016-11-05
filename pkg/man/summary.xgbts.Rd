@@ -8,7 +8,7 @@
 \method{summary}{xgbts}(object, ...)
 }
 \arguments{
-\item{object}{An object created by \code{xgbts}}
+\item{object}{An object created by \code{\link{xgbts}}}
 
 \item{...}{Ignored.}
 }
@@ -26,5 +26,8 @@ plot(electricity_fc)
 }
 \author{
 Peter Ellis
+}
+\seealso{
+\code{\link{xgbts}}
 }
 

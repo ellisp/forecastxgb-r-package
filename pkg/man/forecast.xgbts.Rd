@@ -31,4 +31,7 @@ plot(gas_fc)
 \author{
 Peter Ellis
 }
+\seealso{
+\code{\link{xgbts}}, \code{\link[forecast]{forecast}}
+}
 

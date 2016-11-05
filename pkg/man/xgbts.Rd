@@ -63,4 +63,7 @@ summary(consumption_model)
 \author{
 Peter Ellis
 }
+\seealso{
+\code{\link{summary.xgbts}}, \code{\link{plot.xgbts}}, \code{\link{forecast.xgbts}}, \code{\link{xgbts_importance}}.
+}
 
