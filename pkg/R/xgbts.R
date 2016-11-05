@@ -83,10 +83,10 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
   #---------------model fitting--------------------
   if(nrounds_method == "cv"){
-    message("Starting cross-validation")
+    if(verbose){message("Starting cross-validation")}
     cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
                  early.stop.round = 5, maximize = FALSE, verbose = verbose, ...)
-    # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE
+    # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE?
     
     nrounds_use <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
   } else {if(nrounds_method == "v"){
