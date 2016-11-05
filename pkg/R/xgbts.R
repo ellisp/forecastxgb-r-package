@@ -71,9 +71,9 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   }
   
   # add xreg, if present
-  # TODO - add lags of xreg too
   if(!is.null(xreg)){
-    x <- cbind(x, xreg[-(1:maxlag), , drop = FALSE])
+    xreg <- lagvm(xreg, maxlag = maxlag)
+    x <- cbind(x, xreg[ , , drop = FALSE])
   }
   
   
@@ -148,6 +148,9 @@ forecast.xgbts <- function(object,
     if(!is.null(h)){
       warning(paste("Ignoring h and forecasting", nrow(xreg), "periods from xreg."))
     }
+    
+    # add the lagged versions of xreg
+    xreg <- lagvm(xreg)
     
     h <- nrow(xreg)
     
