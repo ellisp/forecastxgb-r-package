@@ -51,6 +51,18 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   }
   
   orign <- length(y)
+  
+  if(orign < 4){
+    stop("Too short. I need at least four observations.")
+  }
+  
+  if(maxlag > (orign - 3)){
+    warning(paste("y is too short for the value of maxlag.  Reducing maxlags to", 
+                  orign - 3,
+                  "instead."))
+    maxlag <- orign - 3
+  }
+  
   origy <- y
   origxreg <- xreg
   n <- orign - maxlag
@@ -60,6 +72,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     warning("y is too short for cross-validation.  Will validate on the most recent 20 per cent instead.")
     nrounds_method <- "v"
   }
+  
   
     
   #----------------------------creating x--------------------

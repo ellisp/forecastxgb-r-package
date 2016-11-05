@@ -62,8 +62,10 @@ competition <- function(collection, maxfors = length(collection)){
 }
 
 
+
+## Test on a small set of data, useful during dev
 # small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], tourism[[4]], tourism[[5]], tourism[[6]])
-test1 <- competition(small_collection)
+# test1 <- competition(small_collection)
 
 
 
@@ -94,14 +96,16 @@ results_df %>%
   rbind(best) %>%
   mutate(model = factor(model, levels = best$model)) %>%
   ggplot(aes(x = frequency, y = MASE, colour = model, label = model)) +
+  facet_wrap(~model, ncol = 3) +
   geom_text(aes(x = frequency)) +
   geom_line(aes(x = as.numeric(frequency))) +
   geom_text(aes(x = frequency)) +
   theme(legend.position = "none") +
   scale_y_continuous("Mean scaled absolute error - smaller numbers are better", trans = "reverse")
 
+
 # the yearly results are different from those at 
 # https://cran.r-project.org/web/packages/Tcomp/vignettes/tourism-comp.html
 # but the monthly and quarterly ones match.
 
-
+i = 50
