@@ -45,11 +45,20 @@ based on lagged versions of the response time series, dummy variables for season
 matrix is then fed as the feature set for \code{xgboost} to do its stuff.
 }
 \examples{
+# Univariate example - quarterly production of woolen yarn in Australia
 woolmod <- xgbts(woolyrnq)
 summary(woolmod)
 plot(woolmod)
 fc <- forecast(woolmod, h = 8)
 plot(fc)
+
+# Bivariate example - quarterly income and consumption in the US
+if(require(fpp)){
+consumption <- usconsumption[ ,1]
+income <- matrix(usconsumption[ ,2], dimnames = list(NULL, "Income"))
+consumption_model <- xgbts(y = consumption, xreg = income)
+summary(consumption_model)
+}
 }
 \author{
 Peter Ellis

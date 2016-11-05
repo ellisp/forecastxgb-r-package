@@ -29,11 +29,20 @@
 #' @return An object of class \code{xgbts}.
 #' @author Peter Ellis
 #' @examples
+#' # Univariate example - quarterly production of woolen yarn in Australia
 #' woolmod <- xgbts(woolyrnq)
 #' summary(woolmod)
 #' plot(woolmod)
 #' fc <- forecast(woolmod, h = 8)
 #' plot(fc)
+#' 
+#' # Bivariate example - quarterly income and consumption in the US
+#' if(require(fpp)){
+#' consumption <- usconsumption[ ,1]
+#' income <- matrix(usconsumption[ ,2], dimnames = list(NULL, "Income"))
+#' consumption_model <- xgbts(y = consumption, xreg = income)
+#' summary(consumption_model)
+#' }
 xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   nrounds_method = c("cv", "v", "manual"), 
                   nfold = ifelse(length(y) > 30, 10, 5), verbose = FALSE, ...){
