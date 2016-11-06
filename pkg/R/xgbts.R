@@ -275,6 +275,7 @@ forecast.xgbts <- function(object,
     x = object$y,
     mean = y,
     fitted = object$fitted,
+    newx = x,
     method = "xgboost"
   )
   class(output) <- "forecast"
