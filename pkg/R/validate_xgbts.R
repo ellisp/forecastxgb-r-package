@@ -1,4 +1,4 @@
-validate_xgbts <- function(y, xreg = NULL, nrounds = 100, ...){
+validate_xgbts <- function(y, xreg = NULL, nrounds = 50, ...){
   n <- length(y)
   spl <- round(0.8 * n)
   
