@@ -47,7 +47,7 @@
 xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   nrounds_method = c("cv", "v", "manual"), 
                   nfold = ifelse(length(y) > 30, 10, 5), verbose = FALSE, ...){
-  # y <- AirPassengers # for dev
+  # y <- AirPassengers; nrounds_method = "cv" # for dev
 
   nrounds_method = match.arg(nrounds_method)
   
@@ -240,6 +240,10 @@ forecast.xgbts <- function(object,
      x[nrow(x), 1:(object$maxlag - 1)], 
      # linear time:
      timepred)
+   if(object$maxlag == 1){
+     newrow = newrow[-1]
+   }
+   
    if(f > 1){
      # seasons:
      newrow <- c(newrow, x[(nrow(x) + 1 - f), (object$maxlag + 2):(object$maxlag + f)])
