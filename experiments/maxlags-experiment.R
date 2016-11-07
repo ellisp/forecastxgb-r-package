@@ -17,7 +17,7 @@ collection <- M1
 
 
 #================identify best maxlags for a collection=====================
-bestlags <- matrix(0, nrow = length(collection), ncol = 3)
+allmases <- list(length(collection))
 colnames(bestlags) <- c("bestlag", "n", "frequency")
 
 for(i in 1:length(collection)){
@@ -27,8 +27,9 @@ for(i in 1:length(collection)){
   
   n <- length(thedata$x)
   f <- frequency(thedata$x)
+  maxP <- trunc(n / f - 1)
   keepgoing <- TRUE
-  thedata_mases <- numeric()
+  thedata_mases <- numeric(maxp)
   
   for(j in (f + 1):(n - 1 - f * 2)){
     if(keepgoing){
