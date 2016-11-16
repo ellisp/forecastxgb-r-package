@@ -80,11 +80,11 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     stop("Too short. I need at least four observations.")
   }
   
-  if(maxlag > (orign - 3)){
-    warning(paste("y is too short for the value of maxlag.  Reducing maxlags to", 
-                  orign - 3,
+  if(maxlag > (orign - f - round(f / 4))){
+    warning(paste("y is too short for", maxlag, "to be the value of maxlag.  Reducing maxlags to", 
+                  orign - f - round(f / 4),
                   "instead."))
-    maxlag <- orign - 3
+    maxlag <- orign - f - round(f / 4)
   }
   
   origy <- y
