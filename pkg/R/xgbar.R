@@ -26,12 +26,12 @@
 #' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
 #' based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That 
 #' matrix is then fed as the feature set for \code{xgboost} to do its stuff.
-#' @return An object of class \code{xgbts}.
-#' @seealso \code{\link{summary.xgbts}}, \code{\link{plot.xgbts}}, \code{\link{forecast.xgbts}}, \code{\link{xgbts_importance}}.
+#' @return An object of class \code{xgbar}.
+#' @seealso \code{\link{summary.xgbar}}, \code{\link{plot.xgbar}}, \code{\link{forecast.xgbar}}, \code{\link{xgbar_importance}}.
 #' @author Peter Ellis
 #' @examples
 #' # Univariate example - quarterly production of woolen yarn in Australia
-#' woolmod <- xgbts(woolyrnq)
+#' woolmod <- xgbar(woolyrnq)
 #' summary(woolmod)
 #' plot(woolmod)
 #' fc <- forecast(woolmod, h = 8)
@@ -41,10 +41,10 @@
 #' if(require(fpp)){
 #' consumption <- usconsumption[ ,1]
 #' income <- matrix(usconsumption[ ,2], dimnames = list(NULL, "Income"))
-#' consumption_model <- xgbts(y = consumption, xreg = income)
+#' consumption_model <- xgbar(y = consumption, xreg = income)
 #' summary(consumption_model)
 #' }
-xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
+xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   nrounds_method = c("cv", "v", "manual"), 
                   nfold = ifelse(length(y) > 30, 10, 5), verbose = FALSE, ...){
   # y <- AirPassengers; nrounds_method = "cv" # for dev
@@ -134,7 +134,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     
     nrounds_use <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
   } else {if(nrounds_method == "v"){
-      nrounds_use <- validate_xgbts(y, xreg = xreg, ...) $best_nrounds
+      nrounds_use <- validate_xgbar(y, xreg = xreg, ...) $best_nrounds
   } else { 
     nrounds_use <- nrounds
       }
@@ -156,7 +156,7 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     output$ origxreg = origxreg
     output$ncolxreg <- ncol(origxreg)
   }
-  class(output) <- "xgbts"
+  class(output) <- "xgbar"
   return(output)
 
 }
@@ -168,27 +168,27 @@ xgbts <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
 #' @export
 #' @import forecast
 #' @import xgboost
-#' @method forecast xgbts
-#' @param object An object of class "\code{xgbts}".  Usuall the result of a call to \code{\link{xgbts}}.
+#' @method forecast xgbar
+#' @param object An object of class "\code{xgbar}".  Usuall the result of a call to \code{\link{xgbar}}.
 #' @param h Number of periods for forecasting
 #' @param xreg Future values of regression variables.
 #' @param ... Ignored.
 #' @return An object of class \code{forecast}
 #' @author Peter Ellis
-#' @seealso \code{\link{xgbts}}, \code{\link[forecast]{forecast}}
+#' @seealso \code{\link{xgbar}}, \code{\link[forecast]{forecast}}
 #' @examples
 #' # Australian monthly gas production
-#' gas_model <- xgbts(gas)
+#' gas_model <- xgbar(gas)
 #' summary(gas_model)
 #' gas_fc <- forecast(gas_model, h = 12)
 #' plot(gas_fc)
-forecast.xgbts <- function(object, 
+forecast.xgbar <- function(object, 
                           h = NULL,
                           xreg = NULL, ...){
   # validity checks on xreg
   if(!is.null(xreg)){
     if(is.null(object$ncolxreg)){
-      stop("You supplied an xreg, but there is none in the original xgbts object.")
+      stop("You supplied an xreg, but there is none in the original xgbar object.")
     }
     
     if(class(xreg) == "ts" | "data.frame" %in% class(xreg)){
@@ -202,7 +202,7 @@ forecast.xgbts <- function(object,
     }
     
     if(ncol(xreg) != object$ncolxreg){
-      stop("Number of columns in xreg doesn't match the original xgbts object.")
+      stop("Number of columns in xreg doesn't match the original xgbar object.")
     }
     
     if(!is.null(h)){

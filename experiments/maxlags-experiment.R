@@ -29,7 +29,7 @@ for(i in 1:length(collection)){
   thedata_mases <- numeric(maxP)
   
   for(p in 1:maxP){
-    mod <- xgbts(thedata$x, maxlag = p * f, nrounds_method = "cv")
+    mod <- xgbar(thedata$x, maxlag = p * f, nrounds_method = "cv")
     fc <- forecast(mod, h = thedata$h)
     thisacc <- accuracy(fc, thedata$xx)[2, 6]
     print(thisacc)
@@ -42,3 +42,4 @@ for(i in 1:length(collection)){
   
 }
 
+# issue - crashes with the 7th quarterly dataset. n = 13, f = 4.  Too short even for v validation.

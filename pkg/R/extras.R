@@ -1,50 +1,50 @@
-#' Show importance of features in a xgbts model
+#' Show importance of features in a xgbar model
 #' 
-#' This is a light wrapper for \code{xgboost::xbg.importance} to make it easier to use with objects of class \code{xgbts}
+#' This is a light wrapper for \code{xgboost::xbg.importance} to make it easier to use with objects of class \code{xgbar}
 #' @export
-#' @param object An object of class \code{xgbts}, usually created with \code{xgbts()}
+#' @param object An object of class \code{xgbar}, usually created with \code{xgbar()}
 #' @param ... Extra parameters passed through to \code{xgb.importance}
 #' @return A \code{data.table} of the features used in the model with their average gain 
 #' (and their weight for boosted tree model) in the model.
-#' @seealso \code{\link[xgboost]{xgb.importance}}, \code{\link{summary.xgbts}}, \code{\link{xgbts}}.
+#' @seealso \code{\link[xgboost]{xgb.importance}}, \code{\link{summary.xgbar}}, \code{\link{xgbar}}.
 #' @author Peter Ellis
-xgbts_importance <- function(object, ...){
-  if(class(object) != "xgbts"){
-    stop("'object' should be an object of class xgbts.")
+xgbar_importance <- function(object, ...){
+  if(class(object) != "xgbar"){
+    stop("'object' should be an object of class xgbar.")
   }
   xgb.importance(colnames(object$x), model = object$model, ...)
 }
 
-#' Summary of an xgbts object
+#' Summary of an xgbar object
 #' 
-#' summary method for an object created by xgbts
-#' @aliases print.summary.xgbts
+#' summary method for an object created by xgbar
+#' @aliases print.summary.xgbar
 #' @export
-#' @param object An object created by \code{\link{xgbts}}
+#' @param object An object created by \code{\link{xgbar}}
 #' @param ... Ignored.
 #' @author Peter Ellis
-#' @seealso  \code{\link{xgbts}}
+#' @seealso  \code{\link{xgbar}}
 #' @examples
 #' \dontrun{
 #' # Half-hourly electricity demand in England and Wales, takes a few minutes
-#' electricity_model <- xgbts(taylor)
+#' electricity_model <- xgbar(taylor)
 #' summary(electricity_model)
 #' electricity_fc <- forecast(electricity_model, h = 500)
 #' plot(electricity_fc)
 #' }
-summary.xgbts <- function(object, ...){
+summary.xgbar <- function(object, ...){
   ans <- object
-  ans$importance <- xgbts_importance(object)
+  ans$importance <- xgbar_importance(object)
   ans$n <- length(object$y)
   ans$effectn <- length(object$y2)
   ans$ncolx <- ncol(object$x)
-  class(ans) <- "summary.xgbts"
+  class(ans) <- "summary.xgbar"
   return(ans)
 }
   
 #' @export
-#' @method print summary.xgbts
-print.summary.xgbts <- function(x, ...){
+#' @method print summary.xgbar
+print.summary.xgbar <- function(x, ...){
   
   cat("\nImportance of features in the xgboost model:\n")
   print(x$importance)
@@ -55,20 +55,20 @@ print.summary.xgbts <- function(x, ...){
 }
 
 
-#' Plot xgbts object
+#' Plot xgbar object
 #' 
-#' plot method for an object created by xgbts
+#' plot method for an object created by xgbar
 #' @export
 #' @import graphics
-#' @method plot xgbts
-#' @param x An object created by \code{xgbts}
+#' @method plot xgbar
+#' @param x An object created by \code{xgbar}
 #' @param ... Additional arguments passed through to \code{plot()}
 #' @author Peter Ellis
-#' @seealso  \code{\link{xgbts}}
+#' @seealso  \code{\link{xgbar}}
 #' @examples
-#' model <- xgbts(AirPassengers)
+#' model <- xgbar(AirPassengers)
 #' plot(model)
-plot.xgbts <- function(x, ...){
+plot.xgbar <- function(x, ...){
   ts.plot(x$y, col = "brown", ...)
   lines(x$fitted, col = "blue")
   
@@ -80,7 +80,7 @@ plot.xgbts <- function(x, ...){
 #' Summary data from four models, and 11 combinations of models, against the data from the 2010 tourism forecasting competition.
 #' 
 #' Full details of how this was generated are in the Vignette.  This shows the average mean absolute scaled error 
-#' (MASE) from using \code{xgbts} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to generate forecasts of 1,311 tourism data series.
+#' (MASE) from using \code{xgbar} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to generate forecasts of 1,311 tourism data series.
 #' 
 #' 
 #' \itemize{
@@ -93,7 +93,7 @@ plot.xgbts <- function(x, ...){
 #' @examples
 #' if(require(ggplot2)){
 #' leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
-#' n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
+#' n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbar"
 #' 
 #' ggplot(Tcomp_results, aes(x = model, y =  MASE, colour = Frequency, label = model)) +
 #'   geom_text(size = 4) +
@@ -116,7 +116,7 @@ plot.xgbts <- function(x, ...){
 #' 
 #' Full details are in the vignette of how a similar series with tourism competition data was generated.  
 #' The data shows the average mean absolute scaled error 
-#' (MASE) from using \code{xgbts} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to 
+#' (MASE) from using \code{xgbar} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to 
 #' generate forecasts of 3,003 data series from a range of sectors, in the M3 forecasting competition.
 #' 
 #' 
@@ -130,7 +130,7 @@ plot.xgbts <- function(x, ...){
 #' @examples
 #' if(require(ggplot2)){
 #' leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
-#' n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
+#' n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbar"
 #' 
 #' ggplot(Mcomp_results, aes(x = model, y =  MASE, colour = Frequency, label = model)) +
 #'   geom_text(size = 4) +

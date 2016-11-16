@@ -14,7 +14,7 @@ Summary data from four models, and 11 combinations of models, against the data f
 \details{
 Full details are in the vignette of how a similar series with tourism competition data was generated.  
 The data shows the average mean absolute scaled error 
-(MASE) from using \code{xgbts} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to 
+(MASE) from using \code{xgbar} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to 
 generate forecasts of 3,003 data series from a range of sectors, in the M3 forecasting competition.
 
 \itemize{
@@ -26,7 +26,7 @@ generate forecasts of 3,003 data series from a range of sectors, in the M3 forec
 \examples{
 if(require(ggplot2)){
 leg <- "f: Theta; forecast::thetaf\\na: ARIMA; forecast::auto.arima
-n: Neural network; forecast::nnetar\\nx: Extreme gradient boosting; forecastxgb::xgbts"
+n: Neural network; forecast::nnetar\\nx: Extreme gradient boosting; forecastxgb::xgbar"
 
 ggplot(Mcomp_results, aes(x = model, y =  MASE, colour = Frequency, label = model)) +
   geom_text(size = 4) +

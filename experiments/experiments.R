@@ -2,7 +2,7 @@ library(forecastxgb)
 
 fc1 <- forecast(auto.arima(AirPassengers), level = FALSE, h = 36)
 accuracy(fc1)
-object <- xgbts(AirPassengers, maxlag = 12)
+object <- xgbar(AirPassengers, maxlag = 12)
 plot(object)
 
 fc2 <- forecast(object, h = 36)
@@ -36,5 +36,5 @@ fc2$method
 plot(fc1)
 plot(fc2)
 
-modnile <- xgbts(Nile, maxlag = 4)
+modnile <- xgbar(Nile, maxlag = 4)
 plot(modnile)

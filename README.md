@@ -29,7 +29,7 @@ devtools::install_github("ellisp/forecastxgb-r-package/pkg")
 
 ## Basic usage
 
-The workhorse function is `xgbts`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
+The workhorse function is `xgbar`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
 
 ### Univariate
 
@@ -37,7 +37,7 @@ Usage with default values is straightforward.  Here it is fit to Australian mont
 
 ```r
 library(forecastxgb)
-model <- xgbts(gas)
+model <- xgbar(gas)
 ```
 
 ```
@@ -45,7 +45,7 @@ Stopping. Best iteration: 20
 ```
 (Note: the "Stopping. Best iteration..." to the screen is produced by `xgboost::xgb.cv`, which uses `cat()` rather than `message()` to print information on its processing.)
 
-By default, `xgbts` uses row-wise cross-validation to determine the best number of rounds of iterations for the boosting algorithm without overfitting.  A final model is then fit on the full available dataset.  The relative importance of the various features in the model can be inspected by `importance_xgb()` or, more conveniently, the `summary` method for objects of class `xgbts`.
+By default, `xgbar` uses row-wise cross-validation to determine the best number of rounds of iterations for the boosting algorithm without overfitting.  A final model is then fit on the full available dataset.  The relative importance of the various features in the model can be inspected by `importance_xgb()` or, more conveniently, the `summary` method for objects of class `xgbar`.
 
 
 
@@ -121,7 +121,7 @@ The example below, with data taken from the `fpp` package supporting Athanasopou
 library(fpp)
 consumption <- usconsumption[ ,1]
 income <- matrix(usconsumption[ ,2], dimnames = list(NULL, "Income"))
-consumption_model <- xgbts(y = consumption, xreg = income)
+consumption_model <- xgbar(y = consumption, xreg = income)
 ```
 
 ```
@@ -167,7 +167,7 @@ We see that the two most important features explaining consumption are the two p
 The challenge of using external regressors in a forecasting environment is that to forecast, you need values of the future external regressors.  One way this is sometimes done is by first forecasting the individual regressors.  In the example below we do this, making sure the data structure is the same as the original `xreg`.  When the new value of `xreg` is given to `forecast`, it forecasts forward the number of rows of the new `xreg`.  
 
 ```r
-income_future <- matrix(forecast(xgbts(usconsumption[,2]), h = 10)$mean, 
+income_future <- matrix(forecast(xgbar(usconsumption[,2]), h = 10)$mean, 
                         dimnames = list(NULL, "Income"))
 ```
 

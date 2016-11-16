@@ -1,8 +1,8 @@
 
 #=================seasonal=====================
 fc1 <- forecast(AirPassengers, level = FALSE)
-object <- xgbts(AirPassengers, maxlag = 30)
-fc2 <- forecast.xgbts(object)
+object <- xgbar(AirPassengers, maxlag = 30)
+fc2 <- forecast.xgbar(object)
 
 
 expect_identical(fc1$x, fc2$x)
@@ -13,8 +13,8 @@ expect_identical(frequency(fc1$mean), frequency(fc2$mean))
 
 #=================non-seasonal================
 fc1 <- forecast(Nile, level = FALSE)
-object <- xgbts(Nile, maxlag = 30)
-fc2 <- forecast.xgbts(object)
+object <- xgbar(Nile, maxlag = 30)
+fc2 <- forecast.xgbar(object)
 
 
 expect_identical(fc1$x, fc2$x)

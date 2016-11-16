@@ -1,4 +1,4 @@
-validate_xgbts <- function(y, xreg = NULL, nrounds = 50, ...){
+validate_xgbar <- function(y, xreg = NULL, nrounds = 50, ...){
   n <- length(y)
   spl <- round(0.8 * n)
   
@@ -13,9 +13,9 @@ validate_xgbts <- function(y, xreg = NULL, nrounds = 50, ...){
 
   grunt <- function(nrounds){
     if(!is.null(xreg)){
-      trainmod <- xgbts(trainy, xreg = xreg, nrounds_method = "manual", nrounds = nrounds)
+      trainmod <- xgbar(trainy, xreg = xreg, nrounds_method = "manual", nrounds = nrounds)
     } else {
-      trainmod <- xgbts(trainy, nrounds_method = "manual", nrounds = nrounds)  
+      trainmod <- xgbar(trainy, nrounds_method = "manual", nrounds = nrounds)  
     }
     fc <- forecast(trainmod, h = h)
     result <- accuracy(fc, testy)[2,6]  

@@ -27,7 +27,7 @@ competition <- function(collection, maxfors = length(collection)){
   nseries <- length(collection)
   mases <- foreach(i = 1:maxfors, .combine = "rbind") %dopar% {
     thedata <- collection[[i]]  
-    mod1 <- xgbts(thedata$x)
+    mod1 <- xgbar(thedata$x)
     fc1 <- forecast(mod1, h = thedata$h)
     fc2 <- thetaf(thedata$x, h = thedata$h)
     fc3 <- forecast(auto.arima(thedata$x), h = thedata$h)
@@ -116,7 +116,7 @@ Tcomp_results <- results_df %>%
 save(Tcomp_results, file = "pkg/data/Tcomp_results.rda")
 
 leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
-n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
+n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbar"
 
 Tcomp_results %>%
   ggplot(aes(x = model, y =  MASE, colour = Frequency, label = model)) +
@@ -158,7 +158,7 @@ Mcomp_results <- results_df %>%
 save(Mcomp_results, file = "pkg/data/Mcomp_results.rda")
 
 leg <- "f: Theta; forecast::thetaf\na: ARIMA; forecast::auto.arima
-n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbts"
+n: Neural network; forecast::nnetar\nx: Extreme gradient boosting; forecastxgb::xgbar"
 
 Mcomp_results %>%
   ggplot(aes(x = model, y =  MASE, colour = Frequency, label = model)) +

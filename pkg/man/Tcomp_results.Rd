@@ -13,7 +13,7 @@ Summary data from four models, and 11 combinations of models, against the data f
 }
 \details{
 Full details of how this was generated are in the Vignette.  This shows the average mean absolute scaled error 
-(MASE) from using \code{xgbts} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to generate forecasts of 1,311 tourism data series.
+(MASE) from using \code{xgbar} (x), \code{auto.arima} (a), \code{nnetar} (n) and \code{thetaf} (f) to generate forecasts of 1,311 tourism data series.
 
 \itemize{
 \item MASE A mean mean absolute squared error
@@ -24,7 +24,7 @@ Full details of how this was generated are in the Vignette.  This shows the aver
 \examples{
 if(require(ggplot2)){
 leg <- "f: Theta; forecast::thetaf\\na: ARIMA; forecast::auto.arima
-n: Neural network; forecast::nnetar\\nx: Extreme gradient boosting; forecastxgb::xgbts"
+n: Neural network; forecast::nnetar\\nx: Extreme gradient boosting; forecastxgb::xgbar"
 
 ggplot(Tcomp_results, aes(x = model, y =  MASE, colour = Frequency, label = model)) +
   geom_text(size = 4) +

@@ -1,13 +1,13 @@
 
 
-validate_xgbts(Nile)
-tmp <- xgbts(Nile)
+validate_xgbar(Nile)
+tmp <- xgbar(Nile)
 
-validate_xgbts(AirPassengers)
-tmp <- xgbts(AirPassengers)
+validate_xgbar(AirPassengers)
+tmp <- xgbar(AirPassengers)
 
-validate_xgbts(WWWusage)
-tmp <- xgbts(WWWusage)
+validate_xgbar(WWWusage)
+tmp <- xgbar(WWWusage)
 
-validate_xgbts(USAccDeaths)
-tmp <- xgbts(USAccDeaths)
+validate_xgbar(USAccDeaths)
+tmp <- xgbar(USAccDeaths)

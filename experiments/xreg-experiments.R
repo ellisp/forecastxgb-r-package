@@ -7,14 +7,14 @@ fc1 <- forecast(fit1, xreg = income_future)
 names(fc1)
 fc$method
 
-fit2 <- xgbts(y = usconsumption[,1], xreg = matrix(usconsumption[,2], dimnames = list(NULL, "Income")))
-fit3 <- xgbts(y = usconsumption[,1])
+fit2 <- xgbar(y = usconsumption[,1], xreg = matrix(usconsumption[,2], dimnames = list(NULL, "Income")))
+fit3 <- xgbar(y = usconsumption[,1])
 forecast(fit3)
 summary(fit2)
 fit2$origxreg
 
 
-income_future <- matrix(forecast(xgbts(usconsumption[,2]), h = 10)$mean, dimnames = list(NULL, "Income"))
+income_future <- matrix(forecast(xgbar(usconsumption[,2]), h = 10)$mean, dimnames = list(NULL, "Income"))
 
 fc2 <- forecast(object = fit2, xreg = income_future)
 plot(fc2)
