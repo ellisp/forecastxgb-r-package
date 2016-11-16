@@ -4,6 +4,7 @@
 #' Fit a model to a time series using xgboost
 #' 
 #' @export
+#' @aliases xgbts
 #' @import xgboost
 #' @import forecast
 #' @import stats
@@ -159,6 +160,13 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   class(output) <- "xgbar"
   return(output)
 
+}
+
+#`` @export
+xgbts <- function(...){
+  warning("xgbts is deprecated terminology and will soon be removed.
+Please use xgbar instead.")
+  xgbar(...)
 }
 
 #' Forecasting using xgboost models

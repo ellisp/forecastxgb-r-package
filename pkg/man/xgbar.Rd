@@ -2,6 +2,7 @@
 % Please edit documentation in R/xgbar.R
 \name{xgbar}
 \alias{xgbar}
+\alias{xgbts}
 \title{xgboost time series modelling}
 \usage{
 xgbar(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
