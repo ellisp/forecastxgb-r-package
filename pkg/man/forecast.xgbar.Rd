@@ -7,9 +7,11 @@
 \method{forecast}{xgbar}(object, h = NULL, xreg = NULL, ...)
 }
 \arguments{
-\item{object}{An object of class "\code{xgbar}".  Usuall the result of a call to \code{\link{xgbar}}.}
+\item{object}{An object of class "\code{xgbar}".  Usually the result of a call to \code{\link{xgbar}}.}
 
-\item{h}{Number of periods for forecasting}
+\item{h}{Number of periods for forecasting.  If \code{xreg} is provided, the number of rows of \code{xreg} will be 
+used and \code{h} is ignored with a warning.  If both \code{h} and \code{xreg} are \code{NULL} then 
+\code{h = ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10)}}
 
 \item{xreg}{Future values of regression variables.}
 

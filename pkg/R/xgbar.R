@@ -177,8 +177,10 @@ Please use xgbar instead.")
 #' @import forecast
 #' @import xgboost
 #' @method forecast xgbar
-#' @param object An object of class "\code{xgbar}".  Usuall the result of a call to \code{\link{xgbar}}.
-#' @param h Number of periods for forecasting
+#' @param object An object of class "\code{xgbar}".  Usually the result of a call to \code{\link{xgbar}}.
+#' @param h Number of periods for forecasting.  If \code{xreg} is provided, the number of rows of \code{xreg} will be 
+#' used and \code{h} is ignored with a warning.  If both \code{h} and \code{xreg} are \code{NULL} then 
+#' \code{h = ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10)}
 #' @param xreg Future values of regression variables.
 #' @param ... Ignored.
 #' @return An object of class \code{forecast}
