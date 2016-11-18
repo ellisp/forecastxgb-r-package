@@ -87,10 +87,35 @@ income_future <- matrix(forecast(xgbar(usconsumption[,2]), h = 10)$mean,
 plot(forecast(consumption_model, xreg = income_future))
 ```
 
+## Options
+
+### Seasonality
+
+Currently there are two methods of treating seasonality.  The first method tried (and still the default, despite its poor performance - this may change) is to throw dummy variables for each season into the mix of features for `xgboost` to work with.  The alternative is to perform classic multiplicative seasonal adjustment on the series before feeding it to `xgboost`.   This seems to work better:
+
+```{r echo = FALSE}
+model1 <- xgbar(co2, seas_method = "dummies")
+model2 <- xgbar(co2, seas_method = "decompose")
+plot(forecast(model1), main = "Dummy variables for seasonality")
+plot(forecast(model2), main = "Decomposition seasonal adjustment for seasonality")
+```
+
+### Transformations
+
+By default, the data is transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  The value of lambda is chosen by `forecass:BoxCox.lambda`, using the Guerrero method.  Setting the `lambda` parameter to 1 will effectively switch off this transformation
+```{r echo = FALSE}
+model1 <- xgbar(co2, seas_method = "decompose", lambda = 1)
+model2 <- xgbar(co2, seas_method = "decompose")
+plot(forecast(model1), main = "No transformation")
+plot(forecast(model2), main = "With default transformation")
+```
+
+
 ## Future developments
 Future work might include: 
 
 * additional automated time-dependent features (eg dummy variables for trading days, Easter, etc)
 * ability to include xreg values that don't get lagged
 * some kind of automated multiple variable forecasting, similar to a vector-autoregression.
-
+* improved treatment of non-stationary series.  At the moment forecasts seem to level off, even though there is a visually obvious trend.  Obviously this could be fixed by differencing, but this would seem to be just reinventing auto.arima.
+* Different treatments of seasonality.  At the moment there are two options (dummy variables, or de-seasonalising the series before analysis via classical multiplicative decomposition), but there should be at least two more: ignore seasonality altogether, and add some kind of cyclic time variable.

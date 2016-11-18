@@ -186,10 +186,63 @@ plot(forecast(consumption_model, xreg = income_future))
 
 ![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png)
 
+## Options
+
+### Seasonality
+
+Currently there are two methods of treating seasonality.  The first method tried (and still the default, despite its poor performance - this may change) is to throw dummy variables for each season into the mix of features for `xgboost` to work with.  The alternative is to perform classic multiplicative seasonal adjustment on the series before feeding it to `xgboost`.   This seems to work better:
+
+
+```
+Stopping. Best iteration: 30
+```
+
+```
+Stopping. Best iteration: 32
+```
+
+```
+No h provided so forecasting forward 24 periods.
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
+
+```
+No h provided so forecasting forward 24 periods.
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-2.png)
+
+### Transformations
+
+By default, the data is transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  The value of lambda is chosen by `forecass:BoxCox.lambda`, using the Guerrero method.  Setting the `lambda` parameter to 1 will effectively switch off this transformation
+
+```
+Stopping. Best iteration: 61
+```
+
+```
+Stopping. Best iteration: 35
+```
+
+```
+No h provided so forecasting forward 24 periods.
+```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png)
+
+```
+No h provided so forecasting forward 24 periods.
+```
+
+![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-2.png)
+
+
 ## Future developments
 Future work might include: 
 
 * additional automated time-dependent features (eg dummy variables for trading days, Easter, etc)
 * ability to include xreg values that don't get lagged
 * some kind of automated multiple variable forecasting, similar to a vector-autoregression.
-
+* improved treatment of non-stationary series.  At the moment forecasts seem to level off, even though there is a visually obvious trend.  Obviously this could be fixed by differencing, but this would seem to be just reinventing auto.arima.
+* Different treatments of seasonality.  At the moment there are two options (dummy variables, or de-seasonalising the series before analysis via classical multiplicative decomposition), but there should be at least two more: ignore seasonality altogether, and add some kind of cyclic time variable.
