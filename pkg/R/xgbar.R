@@ -32,7 +32,8 @@
 #' based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That 
 #' matrix is then fed as the feature set for \code{xgboost} to do its stuff.
 #' @return An object of class \code{xgbar}.
-#' @seealso \code{\link{summary.xgbar}}, \code{\link{plot.xgbar}}, \code{\link{forecast.xgbar}}, \code{\link{xgbar_importance}}.
+#' @seealso \code{\link{summary.xgbar}}, \code{\link{plot.xgbar}}, \code{\link{forecast.xgbar}}, \code{\link{xgbar_importance}},
+#' \code{\link[xgboost]{xgboost}}.
 #' @author Peter Ellis
 #' @references J. A. John and N. R. Draper (1980), "An Alternative Family of Transformations", \emph{Journal of the Royal Statistical
 #' Society}.
