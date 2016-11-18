@@ -7,7 +7,7 @@
 \usage{
 xgbar(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
   nrounds_method = c("cv", "v", "manual"), nfold = ifelse(length(y) > 30,
-  10, 5), verbose = FALSE, ...)
+  10, 5), lambda = BoxCox.lambda(abs(y)), verbose = FALSE, ...)
 }
 \arguments{
 \item{y}{A univariate time series.}
@@ -28,6 +28,9 @@ the final model.  Options are \code{"cv"} for row-wise cross-validation, \code{"
 set of the most recent 20 per cent of data, \code{"manual"} in which case \code{nrounds} is passed through directly.}
 
 \item{nfold}{Number of equal size subsamples during cross validation, used if \code{nrounds_method = 'cv'}.}
+
+\item{lambda}{Value of lambda to be used for modulus power transformation of \code{y} (which is similar to Box-Cox transformation 
+but works with negative values too).  The transformation is only applied to \code{y}, not \code{xreg}}
 
 \item{verbose}{Passed on to \code{xgboost} and \code{xgb.cv}.}
 

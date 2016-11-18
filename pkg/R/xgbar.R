@@ -22,6 +22,8 @@
 #' @param nrounds_method Method used to determine the value of nrounds actually given for \code{xgboost} for 
 #' the final model.  Options are \code{"cv"} for row-wise cross-validation, \code{"v"} for validation on a testing
 #' set of the most recent 20 per cent of data, \code{"manual"} in which case \code{nrounds} is passed through directly.
+#' @param lambda Value of lambda to be used for modulus power transformation of \code{y} (which is similar to Box-Cox transformation 
+#' but works with negative values too).  The transformation is only applied to \code{y}, not \code{xreg}
 #' @param ... Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".
 #' @details This is the workhorse function for the \code{forecastxgb} package.
 #' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
@@ -47,7 +49,7 @@
 #' }
 xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   nrounds_method = c("cv", "v", "manual"), 
-                  nfold = ifelse(length(y) > 30, 10, 5), verbose = FALSE, ...){
+                  nfold = ifelse(length(y) > 30, 10, 5), lambda = BoxCox.lambda(abs(y)), verbose = FALSE, ...){
   # y <- AirPassengers; nrounds_method = "cv" # for dev
 
   nrounds_method = match.arg(nrounds_method)
@@ -87,7 +89,8 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     maxlag <- orign - f - round(f / 4)
   }
   
-  origy <- y
+  untransformedy <- y
+  origy <- BoxCox(y, lambda = lambda)
   origxreg <- xreg
   n <- orign - maxlag
   y2 <- ts(origy[-(1:(maxlag))], start = time(origy)[maxlag + 1], frequency = f)
@@ -144,14 +147,15 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose, ...)
   
   output <- list(
-    y = origy,
-    y2 = y2,
+    y =  untransformedy,
+    y2 = InvBoxCox(y2, lambda = lambda),
     x = x,
     model = model,
     fitted = ts(c(rep(NA, maxlag), 
-                  predict(model, newdata = x)), 
+                  InvBoxCox(predict(model, newdata = x), lambda = lambda)), 
                 frequency = f, start = min(time(origy))), 
-    maxlag = maxlag
+    maxlag = maxlag,
+    lambda = lambda
   )
   if(!is.null(xreg)){
     output$ origxreg = origxreg
@@ -238,6 +242,7 @@ forecast.xgbar <- function(object,
   }
   
   f <- frequency(object$y)
+  lambda <- object$lambda
   
   # forecast times
   htime <- time(ts(rep(0, h), frequency = f, start = max(time(object$y)) + 1 / f))
@@ -274,14 +279,14 @@ forecast.xgbar <- function(object,
   }
   
   x <- object$x
-  y <- object$y2
+  y <- BoxCox(object$y2, lambda = lambda)
   for(i in 1:h){
     tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg3[i, ])  
     x <- tmp$x
     y <- tmp$y
   }
   
-  y <- ts(y[-(1:length(object$y2))],
+  y <- ts(InvBoxCox(y[-(1:length(object$y2))], lambda = lambda),
           frequency = f,
           start = max(time(object$y)) + 1 / f) 
   
