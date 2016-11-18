@@ -23,7 +23,9 @@
 #' the final model.  Options are \code{"cv"} for row-wise cross-validation, \code{"v"} for validation on a testing
 #' set of the most recent 20 per cent of data, \code{"manual"} in which case \code{nrounds} is passed through directly.
 #' @param lambda Value of lambda to be used for modulus power transformation of \code{y} (which is similar to Box-Cox transformation 
-#' but works with negative values too).  The transformation is only applied to \code{y}, not \code{xreg}
+#' but works with negative values too), performed before using xgboost (and inverse transformed to the original scale afterwards).
+#' Set \code{lambda = 1} if no transformation is desired.  
+#' The transformation is only applied to \code{y}, not \code{xreg}.
 #' @param ... Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".
 #' @details This is the workhorse function for the \code{forecastxgb} package.
 #' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
@@ -32,6 +34,8 @@
 #' @return An object of class \code{xgbar}.
 #' @seealso \code{\link{summary.xgbar}}, \code{\link{plot.xgbar}}, \code{\link{forecast.xgbar}}, \code{\link{xgbar_importance}}.
 #' @author Peter Ellis
+#' @references J. A. John and N. R. Draper (1980), "An Alternative Family of Transformations", \emph{Journal of the Royal Statistical
+#' Society}.
 #' @examples
 #' # Univariate example - quarterly production of woolen yarn in Australia
 #' woolmod <- xgbar(woolyrnq)
@@ -90,7 +94,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   }
   
   untransformedy <- y
-  origy <- BoxCox(y, lambda = lambda)
+  origy <- JDMod(y, lambda = lambda)
   origxreg <- xreg
   n <- orign - maxlag
   y2 <- ts(origy[-(1:(maxlag))], start = time(origy)[maxlag + 1], frequency = f)
@@ -148,11 +152,11 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
   output <- list(
     y =  untransformedy,
-    y2 = InvBoxCox(y2, lambda = lambda),
+    y2 = InvJDMod(y2, lambda = lambda),
     x = x,
     model = model,
     fitted = ts(c(rep(NA, maxlag), 
-                  InvBoxCox(predict(model, newdata = x), lambda = lambda)), 
+                  InvJDMod(predict(model, newdata = x), lambda = lambda)), 
                 frequency = f, start = min(time(origy))), 
     maxlag = maxlag,
     lambda = lambda
@@ -279,14 +283,14 @@ forecast.xgbar <- function(object,
   }
   
   x <- object$x
-  y <- BoxCox(object$y2, lambda = lambda)
+  y <- JDMod(object$y2, lambda = lambda)
   for(i in 1:h){
     tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg3[i, ])  
     x <- tmp$x
     y <- tmp$y
   }
   
-  y <- ts(InvBoxCox(y[-(1:length(object$y2))], lambda = lambda),
+  y <- ts(InvJDMod(y[-(1:length(object$y2))], lambda = lambda),
           frequency = f,
           start = max(time(object$y)) + 1 / f) 
   

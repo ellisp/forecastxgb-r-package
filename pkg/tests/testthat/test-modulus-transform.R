@@ -16,4 +16,10 @@ test_that("Modulus transform works with negative and zero data", {
   expect_error(return1 <- InvJDMod(trans1, lambda = lambda), NA)
   expect_equal(y, return1)
 })
+
+test_that("Modulus transform works when lambda = 1 or 0",{
+  expect_equal(y, JDMod(y, lambda = 1))
+  expect_equal(log(AirPassengers + 1), JDMod(AirPassengers, lambda = 0))
+  
+})
   

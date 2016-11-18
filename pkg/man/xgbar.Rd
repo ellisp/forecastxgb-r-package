@@ -30,7 +30,9 @@ set of the most recent 20 per cent of data, \code{"manual"} in which case \code{
 \item{nfold}{Number of equal size subsamples during cross validation, used if \code{nrounds_method = 'cv'}.}
 
 \item{lambda}{Value of lambda to be used for modulus power transformation of \code{y} (which is similar to Box-Cox transformation 
-but works with negative values too).  The transformation is only applied to \code{y}, not \code{xreg}}
+but works with negative values too), performed before using xgboost (and inverse transformed to the original scale afterwards).
+Set \code{lambda = 1} if no transformation is desired.  
+The transformation is only applied to \code{y}, not \code{xreg}.}
 
 \item{verbose}{Passed on to \code{xgboost} and \code{xgb.cv}.}
 
@@ -66,6 +68,10 @@ summary(consumption_model)
 }
 \author{
 Peter Ellis
+}
+\references{
+J. A. John and N. R. Draper (1980), "An Alternative Family of Transformations", \emph{Journal of the Royal Statistical
+Society}.
 }
 \seealso{
 \code{\link{summary.xgbar}}, \code{\link{plot.xgbar}}, \code{\link{forecast.xgbar}}, \code{\link{xgbar_importance}}.
