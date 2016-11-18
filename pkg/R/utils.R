@@ -44,4 +44,25 @@ lagvm <- function(x, maxlag){
 }
 
 
+# not exported
+# function to perform transformation as per John and Draper's "An Alternative Family of Transformations"
+# John and Draper's modulus transformation
+JDMod <- function(y, lambda){
+  if(lambda != 0){
+    yt <- sign(y) * (((abs(y) + 1) ^ lambda - 1) / lambda)
+  } else {
+    yt = sign(y) * (log(abs(y) + 1))
+  }
+  return(yt)
+}
+
+InvJDMod <- function(yt, lambda){
+  if(lambda != 0){
+    y <- ((abs(yt) * lambda + 1)  ^ (1 / lambda) - 1) * sign(yt)
+  } else {
+    y <- (exp(abs(yt)) - 1) * sign(yt)
+    
+  }
+  return(y)
+}
 
