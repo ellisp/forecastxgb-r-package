@@ -26,6 +26,7 @@
 #' but works with negative values too), performed before using xgboost (and inverse transformed to the original scale afterwards).
 #' Set \code{lambda = 1} if no transformation is desired.  
 #' The transformation is only applied to \code{y}, not \code{xreg}.
+#' @param seas_method Method for dealing with seasonality.
 #' @param ... Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".
 #' @details This is the workhorse function for the \code{forecastxgb} package.
 #' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
@@ -54,10 +55,18 @@
 #' }
 xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   nrounds_method = c("cv", "v", "manual"), 
-                  nfold = ifelse(length(y) > 30, 10, 5), lambda = BoxCox.lambda(abs(y)), verbose = FALSE, ...){
+                  nfold = ifelse(length(y) > 30, 10, 5), 
+                  lambda = BoxCox.lambda(abs(y)), verbose = FALSE, 
+                  seas_method = c("dummies", "decompose"), ...){
   # y <- AirPassengers; nrounds_method = "cv" # for dev
 
   nrounds_method = match.arg(nrounds_method)
+  seas_method = match.arg(seas_method)
+  
+  #TODO - implement decomposition
+  # maxlags can be much fewer, down to 1, if working with adjusted series
+  # need to store the seasonal multipliers for use by forecast
+  # if series is < 3*f+1, should force it to use decomposition
   
   # check y is a univariate time series
   if(!"ts" %in% class(y)){
@@ -75,10 +84,19 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
       stop("xreg should be a numeric and able to be coerced to a matrix")
     }
   }
+  untransformedy <- y
+  origy <- JDMod(y, lambda = lambda)
+  
+  # not sure whether transformation should be before or after seasonal adjustment...
+  if(seas_method == "decompose"){
+    decomp <- decompose(origy, type = "multiplicative")
+    origy <- seasadj(decomp)
+  }
+  
 
   f <- stats::frequency(y)
-  if(maxlag < f){
-    stop("At least one full period of lags needed.")
+  if(maxlag < f & seas_method == "dummies"){
+    stop("At least one full period of lags needed when seas_method = dummies.")
   }
   
   orign <- length(y)
@@ -94,8 +112,6 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     maxlag <- orign - f - round(f / 4)
   }
   
-  untransformedy <- y
-  origy <- JDMod(y, lambda = lambda)
   origxreg <- xreg
   n <- orign - maxlag
   y2 <- ts(origy[-(1:(maxlag))], start = time(origy)[maxlag + 1], frequency = f)
@@ -109,14 +125,15 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     
   #----------------------------creating x--------------------
   # create lagged versions of y to be part of x
-  x <- matrix(0, nrow = n, ncol = maxlag + f)
+  ncolx <- ifelse(seas_method == "dummies", maxlag + f, maxlag + 1)
+  x <- matrix(0, nrow = n, ncol = ncolx)
   x[ , 1:maxlag] <- lagv(origy, maxlag, keeporig = FALSE)
   
   # add a linear time variable for x
   x[ , maxlag + 1] <- time(y2)
   
   # one hot encoding of seasons
-  if(f > 1){
+  if(f > 1 & seas_method == "dummies"){
     tmp <- data.frame(y = 1, x = as.character(rep_len(1:f, n)))
     seasons <- model.matrix(y ~ x, data = tmp)[ ,-1]
     x[ , maxlag + 2:f] <- seasons
@@ -151,17 +168,32 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   if(verbose){message("Fitting xgboost model")}
   model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose, ...)
   
+  fitted <- ts(c(rep(NA, maxlag), 
+                 predict(model, newdata = x)), 
+               frequency = f, start = min(time(origy)))
+  
+  # back transform the seasonal adjustment:
+  if(seas_method == "decompose"){
+    fitted <- fitted * decomp$seasonal
+  }
+  
+  # back transform the modulus power transform:
+  fitted <- InvJDMod(fitted, lambda = lambda)
+  
   output <- list(
-    y =  untransformedy,
-    y2 = InvJDMod(y2, lambda = lambda),
+    y =  untransformedy, # original scale
+    y2 = y2, # possibly both transformed and seasonally adjusted
     x = x,
     model = model,
-    fitted = ts(c(rep(NA, maxlag), 
-                  InvJDMod(predict(model, newdata = x), lambda = lambda)), 
-                frequency = f, start = min(time(origy))), 
+    fitted = fitted, # original scale
     maxlag = maxlag,
+    seas_method = seas_method,
     lambda = lambda
   )
+  if(seas_method == "decompose"){
+    output$decomp <- decomp
+  }
+  
   if(!is.null(xreg)){
     output$ origxreg = origxreg
     output$ncolxreg <- ncol(origxreg)
@@ -178,131 +210,3 @@ Please use xgbar instead.")
   xgbar(...)
 }
 
-#' Forecasting using xgboost models
-#' 
-#' Returns forecasts and other information for xgboost timeseries modesl fit with \code{xbgts}
-#' 
-#' @export
-#' @import forecast
-#' @import xgboost
-#' @method forecast xgbar
-#' @param object An object of class "\code{xgbar}".  Usually the result of a call to \code{\link{xgbar}}.
-#' @param h Number of periods for forecasting.  If \code{xreg} is provided, the number of rows of \code{xreg} will be 
-#' used and \code{h} is ignored with a warning.  If both \code{h} and \code{xreg} are \code{NULL} then 
-#' \code{h = ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10)}
-#' @param xreg Future values of regression variables.
-#' @param ... Ignored.
-#' @return An object of class \code{forecast}
-#' @author Peter Ellis
-#' @seealso \code{\link{xgbar}}, \code{\link[forecast]{forecast}}
-#' @examples
-#' # Australian monthly gas production
-#' gas_model <- xgbar(gas)
-#' summary(gas_model)
-#' gas_fc <- forecast(gas_model, h = 12)
-#' plot(gas_fc)
-forecast.xgbar <- function(object, 
-                          h = NULL,
-                          xreg = NULL, ...){
-  # validity checks on xreg
-  if(!is.null(xreg)){
-    if(is.null(object$ncolxreg)){
-      stop("You supplied an xreg, but there is none in the original xgbar object.")
-    }
-    
-    if(class(xreg) == "ts" | "data.frame" %in% class(xreg)){
-      message("Converting xreg into a matrix")
-      # TODO - not sure this works when it's two dimensional
-      xreg <- as.matrix(xreg)
-    }
-    
-    if(!is.numeric(xreg) | !is.matrix(xreg)){
-      stop("xreg should be a numeric and able to be coerced to a matrix")
-    }
-    
-    if(ncol(xreg) != object$ncolxreg){
-      stop("Number of columns in xreg doesn't match the original xgbar object.")
-    }
-    
-    if(!is.null(h)){
-      warning(paste("Ignoring h and forecasting", nrow(xreg), "periods from xreg."))
-    }
-    
-    # add the lagged versions of xreg.  Some of the lags need to come from the original data
-    h <- nrow(xreg)
-    xreg2 <- lagvm(rbind(xreg, object$origxreg), maxlag = object$maxlag)
-    # we just want the last h rows of that big matrix:
-    nn <- nrow(xreg2)
-    xreg3 <- xreg2[(nn - h + 1):nn, ]
-  } 
-  
-  if(is.null(h)){
-    h <- ifelse(frequency(object$y) > 1, 2 * frequency(object$y), 10)
-    message(paste("No h provided so forecasting forward", h, "periods."))
-  }
-  
-  # clear up space to avoid using an old xreg3 if it exists
-  if(is.null(xreg)){
-    xreg3 <- NULL
-  }
-  
-  f <- frequency(object$y)
-  lambda <- object$lambda
-  
-  # forecast times
-  htime <- time(ts(rep(0, h), frequency = f, start = max(time(object$y)) + 1 / f))
-  
-  forward1 <- function(x, y, timepred, model, xregpred){
-   newrow <- c(
-     # latest lagged value:
-     y[length(y)], 
-     # previous lagged values:
-     x[nrow(x), 1:(object$maxlag - 1)], 
-     # linear time:
-     timepred)
-   if(object$maxlag == 1){
-     newrow = newrow[-1]
-   }
-   
-   if(f > 1){
-     # seasons:
-     newrow <- c(newrow, x[(nrow(x) + 1 - f), (object$maxlag + 2):(object$maxlag + f)])
-   }
-   if(!is.null(xregpred)){
-     newrow <- c(newrow, xregpred)
-   }
-   
-   newrow <- matrix(newrow, nrow = 1)
-   colnames(newrow) <- colnames(x)
-   
-   pred <- predict(model, newdata = newrow)
-   
-   return(list(
-     x = rbind(x, newrow),
-     y = c(y, pred)
-   ))
-  }
-  
-  x <- object$x
-  y <- JDMod(object$y2, lambda = lambda)
-  for(i in 1:h){
-    tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg3[i, ])  
-    x <- tmp$x
-    y <- tmp$y
-  }
-  
-  y <- ts(InvJDMod(y[-(1:length(object$y2))], lambda = lambda),
-          frequency = f,
-          start = max(time(object$y)) + 1 / f) 
-  
-  output <- list(
-    x = object$y,
-    mean = y,
-    fitted = object$fitted,
-    newx = x,
-    method = "xgboost"
-  )
-  class(output) <- "forecast"
-  return(output)
-
-}
