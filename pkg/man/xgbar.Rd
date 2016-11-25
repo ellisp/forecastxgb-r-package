@@ -8,7 +8,7 @@
 xgbar(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
   nrounds_method = c("cv", "v", "manual"), nfold = ifelse(length(y) > 30,
   10, 5), lambda = BoxCox.lambda(abs(y)), verbose = FALSE,
-  seas_method = c("dummies", "decompose"), ...)
+  seas_method = c("dummies", "decompose", "fourier", "none"), K = 5, ...)
 }
 \arguments{
 \item{y}{A univariate time series.}
@@ -38,6 +38,8 @@ The transformation is only applied to \code{y}, not \code{xreg}.}
 \item{verbose}{Passed on to \code{xgboost} and \code{xgb.cv}.}
 
 \item{seas_method}{Method for dealing with seasonality.}
+
+\item{K}{if \code{seas_method == 'fourier'}, the value of \code{K} passed through to \code{fourier} for order of Fourier series to be generated as seasonal regressor variables.}
 
 \item{...}{Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".}
 }

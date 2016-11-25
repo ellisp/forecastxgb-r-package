@@ -71,10 +71,15 @@ forecast.xgbar <- function(object,
   lambda <- object$lambda
   seas_method <- object$seas_method
   
-  # forecast times
+  # forecast time x variable
   htime <- time(ts(rep(0, h), frequency = f, start = max(time(object$y)) + 1 / f))
-  
-  forward1 <- function(x, y, timepred, model, xregpred){
+
+  # forecast fourier pairs
+  if(f > 1 & seas_method == "fourier"){
+    fxh <- fourier(object$y2, K = object$K, h = h)
+  }
+    
+  forward1 <- function(x, y, timepred, model, xregpred, i){
     newrow <- c(
       # latest lagged value:
       y[length(y)], 
@@ -86,10 +91,17 @@ forecast.xgbar <- function(object,
       newrow = newrow[-1]
     }
     
+    # seasonal dummies if 'dummies':
     if(f > 1 & seas_method == "dummies"){
-      # seasons:
+      # for dummy variables it's ok to just take the set of dummies from f time periods before:
       newrow <- c(newrow, x[(nrow(x) + 1 - f), (object$maxlag + 2):(object$maxlag + f)])
     }
+    # seasonal dummies if 'fourier':
+    if(f > 1 & seas_method == 'fourier'){
+      # for fourier variables, 
+      newrow <- c(newrow, fxh[i, ])
+    }
+    
     if(!is.null(xregpred)){
       newrow <- c(newrow, xregpred)
     }
@@ -107,8 +119,9 @@ forecast.xgbar <- function(object,
   
   x <- object$x
   y <- object$y2
+
   for(i in 1:h){
-    tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg3[i, ])  
+    tmp <- forward1(x, y, timepred = htime[i], model = object$model, xregpred = xreg3[i, ], i = i)  
     x <- tmp$x
     y <- tmp$y
   }

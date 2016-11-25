@@ -118,7 +118,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
 
   if (maxlag != round(maxlag)){
     maxlag <- ceiling(maxlag)
-    warning(paste("Rounding maxlag up to", maxlag))
+    if(verbose){message(paste("Rounding maxlag up to", maxlag))}
   }
   
     
@@ -220,6 +220,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
   if(seas_method == "fourier"){
     output$fx <- fx
+    output$K <- K
   }
   
   if(!is.null(xreg)){
