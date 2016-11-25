@@ -58,15 +58,17 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
                   nfold = ifelse(length(y) > 30, 10, 5), 
                   lambda = BoxCox.lambda(abs(y)), verbose = FALSE, 
                   seas_method = c("dummies", "decompose"), ...){
-  # y <- AirPassengers; nrounds_method = "cv" # for dev
+  # y <- seaice_ts; nrounds_method = "cv"; seas_method = "dummies" # for dev
 
   nrounds_method = match.arg(nrounds_method)
   seas_method = match.arg(seas_method)
   
   #TODO - implement decomposition
   # maxlags can be much fewer, down to 1, if working with adjusted series
-  # need to store the seasonal multipliers for use by forecast
   # if series is < 3*f+1, should force it to use decomposition
+  
+  # TODO - fourier as a third option for seas_method
+  # TODO - "none" as an option for seas_method
   
   # check y is a univariate time series
   if(!"ts" %in% class(y)){
@@ -111,7 +113,13 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
                   "instead."))
     maxlag <- orign - f - round(f / 4)
   }
+
+  if (maxlag != round(maxlag)){
+    maxlag <- ceiling(maxlag)
+    warning(paste("Rounding maxlag up to", maxlag))
+  }
   
+    
   origxreg <- xreg
   n <- orign - maxlag
   y2 <- ts(origy[-(1:(maxlag))], start = time(origy)[maxlag + 1], frequency = f)
