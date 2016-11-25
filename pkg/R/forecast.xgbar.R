@@ -121,7 +121,10 @@ forecast.xgbar <- function(object,
   # back transform the seasonal adjustment:
   if(seas_method == "decompose"){
     multipliers <- tail(object$decomp$seasonal, f)
-    y <- y * multipliers 
+    if(h < f){
+      multipliers <- multipliers[1:h]
+    }
+    y <- y * multipliers
   }
   
   # back transform the modulus power transform:
