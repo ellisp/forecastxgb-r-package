@@ -27,6 +27,7 @@
 #' Set \code{lambda = 1} if no transformation is desired.  
 #' The transformation is only applied to \code{y}, not \code{xreg}.
 #' @param seas_method Method for dealing with seasonality.
+#' @param K if \code{seas_method == 'fourier'}, the value of \code{K} passed through to \code{fourier} for order of Fourier series to be generated as seasonal regressor variables.
 #' @param ... Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".
 #' @details This is the workhorse function for the \code{forecastxgb} package.
 #' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
@@ -57,7 +58,8 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
                   nrounds_method = c("cv", "v", "manual"), 
                   nfold = ifelse(length(y) > 30, 10, 5), 
                   lambda = BoxCox.lambda(abs(y)), verbose = FALSE, 
-                  seas_method = c("dummies", "decompose"), ...){
+                  seas_method = c("dummies", "decompose", "fourier", "none"), 
+                  K = 5, ...){
   # y <- seaice_ts; nrounds_method = "cv"; seas_method = "dummies" # for dev
 
   nrounds_method = match.arg(nrounds_method)
@@ -132,23 +134,37 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
     
   #----------------------------creating x--------------------
-  # create lagged versions of y to be part of x
-  ncolx <- ifelse(seas_method == "dummies", maxlag + f, maxlag + 1)
+  # set up the matrix "x" of lagged versions of y, time series trend, and seasonal treatment:
+  if(seas_method == "dummies"){ncolx <- maxlag + f}
+  if(seas_method == "decompose"){ncolx <- maxlag + 1}
+  if(seas_method == "fourier"){ncolx <- maxlag + 1 + K * 2}
+  if(seas_method == "none"){ncolx <- maxlag + 1}
   x <- matrix(0, nrow = n, ncol = ncolx)
+  
+  # All models get the lagged values of y as regressors:
   x[ , 1:maxlag] <- lagv(origy, maxlag, keeporig = FALSE)
   
-  # add a linear time variable for x
+  # All models add a linear time variable for x:
   x[ , maxlag + 1] <- time(y2)
   
-  # one hot encoding of seasons
+  # Some models get one hot encoding of seasons
   if(f > 1 & seas_method == "dummies"){
     tmp <- data.frame(y = 1, x = as.character(rep_len(1:f, n)))
     seasons <- model.matrix(y ~ x, data = tmp)[ ,-1]
     x[ , maxlag + 2:f] <- seasons
     
-    # rename columns of x
     colnames(x) <- c(paste0("lag", 1:maxlag), "time", paste0("season", 2:f))
-  } else {
+  } 
+  
+  # Fourier models get fourier cycles:
+  if(f > 1 & seas_method == "fourier"){
+    fx <- fourier(y2, K = K)
+    x[ , (maxlag + 2):ncolx] <- fx
+    colnames(x) <- c(paste0("lag", 1:maxlag), "time", colnames(fx))
+  }
+  
+  # Some models get no seasonal treatment at all:
+  if(f == 1 || seas_method == "decompose" || seas_method == "none"){
     colnames(x) <- c(paste0("lag", 1:maxlag), "time")
   }
   
@@ -200,6 +216,10 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   )
   if(seas_method == "decompose"){
     output$decomp <- decomp
+  }
+  
+  if(seas_method == "fourier"){
+    output$fx <- fx
   }
   
   if(!is.null(xreg)){
