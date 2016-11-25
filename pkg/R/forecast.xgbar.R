@@ -5,6 +5,7 @@
 #' @export
 #' @import forecast
 #' @import xgboost
+#' @importFrom utils tail
 #' @method forecast xgbar
 #' @param object An object of class "\code{xgbar}".  Usually the result of a call to \code{\link{xgbar}}.
 #' @param h Number of periods for forecasting.  If \code{xreg} is provided, the number of rows of \code{xreg} will be 
