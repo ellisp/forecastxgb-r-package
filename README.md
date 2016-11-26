@@ -13,7 +13,6 @@ Only on GitHub, but plan for a CRAN release in November 2016.  Comments and sugg
 This implementation uses as explanatory features: 
 
 * lagged values of the response variable
-* numeric time,
 * dummy variables for seasons.
 * current and lagged values of any external regressors supplied as `xreg`
 
@@ -30,7 +29,7 @@ devtools::install_github("ellisp/forecastxgb-r-package/pkg")
 
 ## Basic usage
 
-The workhorse function is `xgbar`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
+The workhorse function is `xgbar`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, and (optionally) dummy variables of some sort for seasons.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
 
 ### Univariate
 
@@ -42,7 +41,7 @@ model <- xgbar(gas)
 ```
 
 ```
-Stopping. Best iteration: 39
+Stopping. Best iteration: 15
 ```
 (Note: the "Stopping. Best iteration..." to the screen is produced by `xgboost::xgb.cv`, which uses `cat()` rather than `message()` to print information on its processing.)
 
@@ -57,45 +56,39 @@ summary(model)
 ```
 
 Importance of features in the xgboost model:
-     Feature         Gain        Cover   Frequence
- 1:    lag24 4.771009e-01 0.0782463031 0.040650407
- 2:     lag1 3.206121e-01 0.1047365989 0.199767712
- 3:    lag12 1.893496e-01 0.0863216266 0.061556330
- 4:     time 8.961361e-03 0.0556261553 0.029036005
- 5:    lag23 8.954508e-04 0.0466612754 0.031358885
- 6:    lag11 8.701390e-04 0.0282116451 0.036004646
- 7:    lag10 2.571064e-04 0.0356053604 0.036004646
- 8:    lag15 2.564976e-04 0.0450439002 0.027874564
- 9:     lag8 1.973647e-04 0.0213609057 0.030197445
-10:    lag22 1.260238e-04 0.0467190388 0.029036005
-11:    lag20 1.169542e-04 0.0213378004 0.012775842
-12:    lag21 1.142894e-04 0.0198937153 0.018583043
-13:    lag19 1.092936e-04 0.0213724584 0.020905923
-14:    lag16 1.028674e-04 0.0583294824 0.034843206
-15:     lag5 9.872862e-05 0.0350392791 0.052264808
-16:     lag2 9.722143e-05 0.0354667283 0.067363531
-17:    lag13 9.525919e-05 0.0178257856 0.022067364
-18:    lag14 8.384108e-05 0.0216728281 0.026713124
-19:     lag9 8.356965e-05 0.0370725508 0.039488966
-20:     lag3 8.296392e-05 0.0224468577 0.046457607
-21:    lag18 6.682167e-05 0.0204829020 0.015098722
-22:     lag7 6.245830e-05 0.0195702403 0.027874564
-23: season10 5.828477e-05 0.0202634011 0.006968641
-24:     lag4 4.316536e-05 0.0280268022 0.034843206
-25:     lag6 4.307472e-05 0.0164279113 0.022067364
-26:    lag17 2.683291e-05 0.0156423290 0.010452962
-27:  season4 2.178538e-05 0.0029459335 0.001161440
-28:  season8 1.689185e-05 0.0181839187 0.005807201
-29:  season5 1.296806e-05 0.0014556377 0.001161440
-30: season12 1.201612e-05 0.0007162662 0.001161440
-31:  season6 9.631610e-06 0.0082832717 0.003484321
-32:  season7 6.574207e-06 0.0001963956 0.001161440
-33:  season9 4.525862e-06 0.0002657116 0.002322880
-34: season11 3.151149e-06 0.0034311460 0.001161440
-35:  season3 3.630195e-07 0.0051178373 0.002322880
-     Feature         Gain        Cover   Frequence
+    Feature         Gain        Cover   Frequence
+ 1:   lag12 5.097936e-01 0.1480752533 0.078475336
+ 2:   lag11 2.796867e-01 0.0731403763 0.042600897
+ 3:   lag13 1.043604e-01 0.0355137482 0.031390135
+ 4:   lag24 7.807860e-02 0.1320115774 0.069506726
+ 5:    lag1 1.579312e-02 0.1885383502 0.181614350
+ 6:   lag23 5.616290e-03 0.0471490593 0.042600897
+ 7:    lag9 2.510372e-03 0.0459623734 0.040358744
+ 8:    lag2 6.759874e-04 0.0436179450 0.053811659
+ 9:   lag14 5.874155e-04 0.0311432706 0.026905830
+10:   lag10 5.467606e-04 0.0530535456 0.053811659
+11:    lag6 3.820611e-04 0.0152243126 0.033632287
+12:    lag4 2.188107e-04 0.0098697540 0.035874439
+13:   lag22 2.162973e-04 0.0103617945 0.017937220
+14:   lag16 2.042320e-04 0.0098118669 0.013452915
+15:   lag21 1.962725e-04 0.0149638205 0.026905830
+16:   lag18 1.810734e-04 0.0243994211 0.029147982
+17:    lag3 1.709305e-04 0.0132850941 0.035874439
+18:    lag5 1.439827e-04 0.0231837916 0.033632287
+19:   lag15 1.313859e-04 0.0143560058 0.031390135
+20:   lag17 1.239889e-04 0.0109696093 0.017937220
+21: season7 1.049934e-04 0.0081041968 0.015695067
+22:    lag8 9.773024e-05 0.0123299566 0.026905830
+23:   lag19 7.733822e-05 0.0112879884 0.015695067
+24:   lag20 5.425515e-05 0.0072648336 0.011210762
+25:    lag7 3.772907e-05 0.0105354559 0.020179372
+26: season4 4.067607e-06 0.0010709117 0.002242152
+27: season5 2.863805e-06 0.0022286541 0.006726457
+28: season6 2.628821e-06 0.0021707670 0.002242152
+29: season9 9.226827e-08 0.0003762663 0.002242152
+    Feature         Gain        Cover   Frequence
 
- 36 features considered.
+ 35 features considered.
 476 original observations.
 452 effective observations after creating lagged features.
 ```
@@ -129,7 +122,7 @@ consumption_model <- xgbar(y = consumption, xreg = income)
 ```
 
 ```
-Stopping. Best iteration: 35
+Stopping. Best iteration: 8
 ```
 
 ```r
@@ -139,31 +132,28 @@ summary(consumption_model)
 ```
 
 Importance of features in the xgboost model:
-        Feature         Gain        Cover   Frequence
- 1:        lag1 2.661271e-01 0.0827531394 0.176969697
- 2:        lag2 2.554177e-01 0.1028771261 0.099393939
- 3: Income_lag0 1.118823e-01 0.0900015896 0.061818182
- 4:        lag3 4.599884e-02 0.0466062629 0.069090909
- 5:        lag8 4.232664e-02 0.1188682244 0.056969697
- 6:        lag5 3.955193e-02 0.0320457797 0.042424242
- 7:        time 3.932981e-02 0.0441901129 0.042424242
- 8: Income_lag8 3.582390e-02 0.0608806231 0.052121212
- 9:        lag6 3.332802e-02 0.0333492291 0.043636364
-10:        lag7 2.280162e-02 0.0665712923 0.064242424
-11: Income_lag1 2.108113e-02 0.0644412653 0.038787879
-12: Income_lag5 1.674024e-02 0.0315371165 0.027878788
-13:        lag4 1.635172e-02 0.0753139405 0.056969697
-14: Income_lag6 1.596227e-02 0.0283897632 0.026666667
-15: Income_lag2 1.212812e-02 0.0324908600 0.041212121
-16: Income_lag3 1.031139e-02 0.0186933715 0.027878788
-17: Income_lag7 7.396999e-03 0.0170084247 0.021818182
-18: Income_lag4 6.643026e-03 0.0218407248 0.032727273
-19:     season2 6.532480e-04 0.0018756954 0.003636364
-20:     season3 1.431929e-04 0.0295024638 0.010909091
-21:     season4 8.024994e-07 0.0007629948 0.002424242
-        Feature         Gain        Cover   Frequence
+        Feature        Gain       Cover   Frequence
+ 1:        lag2 0.280707265 0.088010026 0.126086957
+ 2:        lag1 0.269531385 0.184653948 0.204347826
+ 3: Income_lag0 0.103122728 0.146219190 0.091304348
+ 4: Income_lag1 0.051318189 0.074223646 0.043478261
+ 5:        lag8 0.042695148 0.107227406 0.052173913
+ 6:        lag3 0.039635713 0.072970338 0.069565217
+ 7:        lag6 0.035046542 0.059462470 0.047826087
+ 8: Income_lag8 0.033260720 0.032168222 0.034782609
+ 9: Income_lag6 0.028728175 0.012672330 0.030434783
+10:        lag7 0.019318548 0.050132294 0.043478261
+11:        lag4 0.018150376 0.028129787 0.065217391
+12: Income_lag2 0.017464400 0.035788887 0.047826087
+13: Income_lag5 0.016736308 0.039270297 0.034782609
+14:        lag5 0.014711913 0.017685559 0.030434783
+15: Income_lag3 0.012430195 0.019078123 0.026086957
+16: Income_lag4 0.010153752 0.018521097 0.034782609
+17:     season4 0.004981051 0.002506615 0.004347826
+18:     season3 0.001350750 0.010026459 0.008695652
+19: Income_lag7 0.000656844 0.001253307 0.004347826
 
- 21 features considered.
+ 20 features considered.
 164 original observations.
 156 effective observations after creating lagged features.
 ```
@@ -199,15 +189,15 @@ Currently there are three methods of treating seasonality.
 
 
 ```
-Stopping. Best iteration: 30
+Stopping. Best iteration: 49
 ```
 
 ```
-Stopping. Best iteration: 32
+Stopping. Best iteration: 63
 ```
 
 ```
-Stopping. Best iteration: 38
+Stopping. Best iteration: 65
 ```
 
 ```
@@ -232,14 +222,14 @@ All methods perform quite poorly at the moment, suffering from the difficulty th
 
 ### Transformations
 
-By default, the data is transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  The value of lambda is chosen by `forecass:BoxCox.lambda`, using the Guerrero method.  Setting the `lambda` parameter to 1 will effectively switch off this transformation
+The data can be transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  Leaving the `lambda` parameter as 1 will effectively switch off this transformation.
 
 ```
-Stopping. Best iteration: 64
+Stopping. Best iteration: 61
 ```
 
 ```
-Stopping. Best iteration: 38
+Stopping. Best iteration: 35
 ```
 
 ```
@@ -254,6 +244,8 @@ No h provided so forecasting forward 24 periods.
 
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-2.png)
 
+Version 0.0.9 of `forecastxgb` gave `lambda` the default value of `BoxCox.lambda(abs(y))`.  This returned spectacularly bad forecasting results.  Forcing this to be between 0 and 1 helped a little, but still gave very bad results.  So far there isn't evidence (but neither is there enough investigation) that a Box Cox transformation helps xgbar do its model fitting at all.
+
 ### Non-stationarity
 From experiments so far, it seems the basic idea of `xgboost` struggles in this context with extrapolation into a new range of variables not in the training set.  This suggests better results might be obtained by transforming the series into a stationary one before modelling - a similar approach to that taken by `forecast::auto.arima`.  This option is available by `trend_method = "differencing"` and seems to perform well - certainly better than without - and it will probably be made a default setting once more experience is available.
 
@@ -263,7 +255,7 @@ model <- xgbar(AirPassengers, trend_method = "differencing", seas_method = "four
 ```
 
 ```
-Stopping. Best iteration: 24
+Stopping. Best iteration: 44
 ```
 
 ```r
@@ -279,5 +271,4 @@ Future work might include:
 * additional automated time-dependent features (eg dummy variables for trading days, Easter, etc)
 * ability to include xreg values that don't get lagged
 * some kind of automated multiple variable forecasting, similar to a vector-autoregression.
-* improved treatment of non-stationary series.  At the moment forecasts seem to level off, even though there is a visually obvious trend.  Obviously this could be fixed by differencing, but this would seem to be just reinventing auto.arima.
-* Different treatments of seasonality.  At the moment there are two options (dummy variables, or de-seasonalising the series before analysis via classical multiplicative decomposition), but there should be at least two more: ignore seasonality altogether, and add some kind of cyclic time variable.
+* better choices of defaults for values such as `lambda` (for power transformations), `K` (for Fourier transforms) and, most likely to be effective, `maxlag`.

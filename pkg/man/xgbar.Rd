@@ -57,7 +57,7 @@ Fit a model to a time series using xgboost
 \details{
 This is the workhorse function for the \code{forecastxgb} package.
 It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
-based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That 
+based on lagged versions of the response time series, and (optionally) dummy variables (simple hot one encoding, or Fourier transforms) for seasons.  That 
 matrix is then fed as the feature set for \code{xgboost} to do its stuff.
 }
 \examples{
