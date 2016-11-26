@@ -92,6 +92,12 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   untransformedy <- y
   origy <- JDMod(y, lambda = lambda)
   
+  # seasonal adjustment if asked for
+  if(seas_method == "decompose"){
+    decomp <- decompose(origy, type = "multiplicative")
+    origy <- seasadj(decomp)
+  }
+  
   # de-trend the y if option was asked for
   # `diffs` is the number of differencing operations done, and is defined even if 
   # trend_method != "differencing"
@@ -108,13 +114,6 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     }
   }
   
-  # seasonal adjustment if asked for
-  if(seas_method == "decompose"){
-    decomp <- decompose(origy, type = "multiplicative")
-    origy <- seasadj(decomp)
-  }
-  
-
   if(maxlag < f & seas_method == "dummies"){
     stop("At least one full period of lags needed when seas_method = dummies.")
   }
@@ -202,17 +201,13 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     nrounds_use <- nrounds
       }
   }  
+  
   if(verbose){message("Fitting xgboost model")}
   model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose)
   
   fitted <- ts(c(rep(NA, maxlag), 
                  predict(model, newdata = x)), 
                frequency = f, start = min(time(origy)))
-  
-  # back transform the seasonal adjustment:
-  if(seas_method == "decompose"){
-    fitted <- fitted * decomp$seasonal
-  }
   
   # back transform the differencing
   if(trend_method == "differencing"){
@@ -221,6 +216,12 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     }
     fitted <- fitted + JDMod(untransformedy[maxlag + 1], lambda = lambda)
   }
+  
+  # back transform the seasonal adjustment:
+  if(seas_method == "decompose"){
+    fitted <- fitted * decomp$seasonal
+  }
+  
   
   # back transform the modulus power transform:
   fitted <- InvJDMod(fitted, lambda = lambda)

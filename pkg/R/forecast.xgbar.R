@@ -129,6 +129,14 @@ forecast.xgbar <- function(object,
           frequency = f,
           start = max(time(object$y)) + 1 / f) 
   
+  # back transform the differencing
+  if(object$diffs > 0){
+    for(i in 1:object$diffs){
+      y <- ts(cumsum(y)  , start = start(y), frequency = f)
+    }
+    y <- y + JDMod(object$y[length(object$y)], lambda = lambda)
+  }
+  
   # back transform the seasonal adjustment:
   if(seas_method == "decompose"){
     multipliers <- tail(object$decomp$seasonal, f)
@@ -136,14 +144,6 @@ forecast.xgbar <- function(object,
       multipliers <- multipliers[1:h]
     }
     y <- y * multipliers
-  }
-  
-  # back transform the differencing
-  if(object$diffs > 0){
-    for(i in 1:object$diffs){
-      y <- ts(cumsum(y)  , start = start(y), frequency = f)
-    }
-    y <- y + JDMod(object$y[length(object$y)], lambda = lambda)
   }
   
   # back transform the modulus power transform:
