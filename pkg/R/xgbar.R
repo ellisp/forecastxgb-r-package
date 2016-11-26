@@ -8,7 +8,7 @@
 #' @import xgboost
 #' @import forecast
 #' @import stats
-#' @imporFrom tseries kpss.test
+#' @importFrom tseries kpss.test
 #' @param y A univariate time series.
 #' @param xreg Optionally, a vector or matrix of external regressors, which must have the same number of rows as y.
 #' @param nrounds Maximum number of iterations \code{xgboost} will perform.  If \code{nrounds_method = 'cv'}, 

@@ -1,7 +1,7 @@
 ---
 title: "Extreme gradient boosting time series forecasting"
 author: "Peter Ellis"
-date: "6 November 2016"
+date: "26 November 2016"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Extreme gradient boosting time series forecasting}
@@ -11,9 +11,11 @@ vignette: >
 
 The `forecastxgb` package provides time series modelling and forecasting functions that combine the machine learning approach of Chen, He and Benesty's [`xgboost`](https://CRAN.R-project.org/package=xgboost) with the convenient handling of time series and familiar API of Rob Hyndman's [`forecast`](http://github.com/robjhyndman/forecast).  It applies to time series the Extreme Gradient Boosting proposed in [*Greedy Function Approximation: A Gradient Boosting Machine*, by Jerome Friedman in 2001](http://www.jstor.org/stable/2699986). xgboost has become an important machine learning algorithm; nicely explained in [this accessible documentation](http://xgboost.readthedocs.io/en/latest/model.html).
 
+**Warning: this package is under active development.  The API and default settings should be expected to continue to change.**
+
 ## Basic usage
 
-The workhorse function is `xgbar`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
+The workhorse function is `xgbar`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That matrix is then fed as the feature set for `xgboost` to do its stuff.  
 ```{r echo = FALSE, cache = FALSE}
 set.seed(123)
 library(knitr)
@@ -98,6 +100,14 @@ model1 <- xgbar(co2, seas_method = "decompose", lambda = 1)
 model2 <- xgbar(co2, seas_method = "decompose")
 plot(forecast(model1), main = "No transformation")
 plot(forecast(model2), main = "With default transformation")
+```
+
+### Non-stationarity
+From experiments so far, it seems the basic idea of `xgboost` struggles in this context with extrapolation into a new range of variables not in the training set.  This suggests better results might be obtained by transforming the series into a stationary one before modelling - a similar approach to that taken by `forecast::auto.arima`.  This option is available by `trend_method = "differencing"` and seems to perform well - certainly better than without - and it will probably be made a default setting once more experience is available.
+
+```{r}
+model <- xgbar(AirPassengers, trend_method = "differencing", seas_method = "fourier")
+plot(forecast(model, 24))
 ```
 
 

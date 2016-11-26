@@ -5,6 +5,7 @@ The `forecastxgb` package provides time series modelling and forecasting functio
 [![CRAN version](http://www.r-pkg.org/badges/version/forecastxgb)](http://www.r-pkg.org/pkg/forecastxgb)
 [![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/forecastxgb)](http://www.r-pkg.org/pkg/forecastxgb)
 
+**Warning: this package is under active development and is some way off a CRAN release (realistically, no some time in 2017).  Currently the forecasting results with the default settings are, frankly, pretty rubbish, but there is hope I can get better settings.  The API and default values of arguments should be expected to continue to change.**
 
 ## Installation
 Only on GitHub, but plan for a CRAN release in November 2016.  Comments and suggestions welcomed.
@@ -236,6 +237,24 @@ No h provided so forecasting forward 24 periods.
 ```
 
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-2.png)
+
+### Non-stationarity
+From experiments so far, it seems the basic idea of `xgboost` struggles in this context with extrapolation into a new range of variables not in the training set.  This suggests better results might be obtained by transforming the series into a stationary one before modelling - a similar approach to that taken by `forecast::auto.arima`.  This option is available by `trend_method = "differencing"` and seems to perform well - certainly better than without - and it will probably be made a default setting once more experience is available.
+
+
+```r
+model <- xgbar(AirPassengers, trend_method = "differencing", seas_method = "fourier")
+```
+
+```
+Stopping. Best iteration: 25
+```
+
+```r
+plot(forecast(model, 24))
+```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png)
 
 
 ## Future developments
