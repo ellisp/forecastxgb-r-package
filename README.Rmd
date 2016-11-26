@@ -13,7 +13,6 @@ Only on GitHub, but plan for a CRAN release in November 2016.  Comments and sugg
 This implementation uses as explanatory features: 
 
 * lagged values of the response variable
-* numeric time,
 * dummy variables for seasons.
 * current and lagged values of any external regressors supplied as `xreg`
 
@@ -36,7 +35,7 @@ devtools::install_github("ellisp/forecastxgb-r-package/pkg")
 
 ## Basic usage
 
-The workhorse function is `xgbar`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, dummy variables for seasons, and numeric time.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
+The workhorse function is `xgbar`.  This fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables based on lagged versions of the response time series, and (optionally) dummy variables of some sort for seasons.  That matrix is then fed as the feature set for `xgboost` to do its stuff.
 
 ### Univariate
 
@@ -136,5 +135,4 @@ Future work might include:
 * additional automated time-dependent features (eg dummy variables for trading days, Easter, etc)
 * ability to include xreg values that don't get lagged
 * some kind of automated multiple variable forecasting, similar to a vector-autoregression.
-* improved treatment of non-stationary series.  At the moment forecasts seem to level off, even though there is a visually obvious trend.  Obviously this could be fixed by differencing, but this would seem to be just reinventing auto.arima.
-* Different treatments of seasonality.  At the moment there are two options (dummy variables, or de-seasonalising the series before analysis via classical multiplicative decomposition), but there should be at least two more: ignore seasonality altogether, and add some kind of cyclic time variable.
+* better choices of defaults for values such as `lambda` (for power transformations), `K` (for Fourier transforms) and, most likely to be effective, `maxlag`.
