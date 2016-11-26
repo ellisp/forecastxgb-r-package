@@ -64,7 +64,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
                   lambda = 1, 
                   verbose = FALSE, 
                   seas_method = c("dummies", "decompose", "fourier", "none"), 
-                  K =  max(1, min(round(f / 2 - 1), 10)), 
+                  K =  max(1, min(round(f / 4 - 1), 10)), 
                   trend_method = c("none", "differencing"), ...){
   # y <- AirPassengers; nrounds_method = "cv"; seas_method = "fourier"; trend_method = "differencing" # for dev
 

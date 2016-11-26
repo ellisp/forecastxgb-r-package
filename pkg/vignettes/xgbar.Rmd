@@ -173,7 +173,8 @@ competition <- function(collection, maxfors = length(collection)){
   nseries <- length(collection)
   mases <- foreach(i = 1:maxfors, .combine = "rbind") %dopar% {
     thedata <- collection[[i]]  
-    mod1 <- xgbar(thedata$x, trend_method = "differencing", seas_method = "dummies", lambda = 1)
+    seas_method <- ifelse(frequency(thedata$x) < 6, "dummies", "fourier")
+    mod1 <- xgbar(thedata$x, trend_method = "differencing", seas_method = seas_method, lambda = 1, K = 2)
     fc1 <- forecast(mod1, h = thedata$h)
     fc2 <- thetaf(thedata$x, h = thedata$h)
     fc3 <- forecast(auto.arima(thedata$x), h = thedata$h)
