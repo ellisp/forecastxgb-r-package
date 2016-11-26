@@ -271,7 +271,7 @@ Tcomp_results %>%
 ```
 
 
-We see the overall best performing ensemble is the average of the Theta and ARIMA models - the two from the more traditional timeseries forecasting approach.  The two machine learning methods (neural network and extreme gradient boosting) are not as effective, at least in these implementations.  As individual methods, they are the two weakest, although the extreme gradient boosting method provided in `forecastxgb` performs noticeably better than `forecast::nnetar`.
+We see the overall best performing ensemble is the average of the Theta and ARIMA models - the two from the more traditional timeseries forecasting approach.  The two machine learning methods (neural network and extreme gradient boosting) are not as effective, at least in these implementations.  As individual methods, they are the two weakest, although the extreme gradient boosting method provided in `forecastxgb` performs noticeably better than `forecast::nnetar` for the annual and quarterly data.
 
 Theta by itself is the best performing with the annual data - simple methods work well when the dataset is small and highly aggregate.  The best that can be said of the `xgbar` approach in this context is that it doesn't damage the Theta method much when included in a combination - several of the better performing ensembles have `xgbar` as one of their members.  In contrast, the neural network models do badly with this collection of annual data.
 
