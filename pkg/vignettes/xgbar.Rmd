@@ -83,14 +83,22 @@ The default settings for `xgbar` give reasonable results.  The key things that c
 
 ### Seasonality
 
-Currently there are two methods of treating seasonality.  The first method tried (and still the default, despite its poor performance - this may change) is to throw dummy variables for each season into the mix of features for `xgboost` to work with.  The alternative is to perform classic multiplicative seasonal adjustment on the series before feeding it to `xgboost`.   This seems to work better:
+Currently there are three methods of treating seasonality.  
+
+- The current default method is to throw dummy variables for each season into the mix of features for `xgboost` to work with.  
+- An alternative is to perform classic multiplicative seasonal adjustment on the series before feeding it to `xgboost`.   This seems to work better.
+- A third option is to create a set of pairs of Fourier transform variables and use them as x regressors
 
 ```{r echo = FALSE}
 model1 <- xgbar(co2, seas_method = "dummies")
 model2 <- xgbar(co2, seas_method = "decompose")
+model3 <- xgbar(co2, seas_method = "fourier")
 plot(forecast(model1), main = "Dummy variables for seasonality")
 plot(forecast(model2), main = "Decomposition seasonal adjustment for seasonality")
+plot(forecast(model3), main = "Fourier transform pairs as x regressors")
 ```
+
+All methods perform quite poorly at the moment, suffering from the difficulty the default settings have in dealing with non-stationary data (see below).
 
 ### Transformations
 

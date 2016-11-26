@@ -191,7 +191,11 @@ plot(forecast(consumption_model, xreg = income_future))
 
 ### Seasonality
 
-Currently there are two methods of treating seasonality.  The first method tried (and still the default, despite its poor performance - this may change) is to throw dummy variables for each season into the mix of features for `xgboost` to work with.  The alternative is to perform classic multiplicative seasonal adjustment on the series before feeding it to `xgboost`.   This seems to work better:
+Currently there are three methods of treating seasonality.  
+
+- The current default method is to throw dummy variables for each season into the mix of features for `xgboost` to work with.  
+- An alternative is to perform classic multiplicative seasonal adjustment on the series before feeding it to `xgboost`.   This seems to work better.
+- A third option is to create a set of pairs of Fourier transform variables and use them as x regressors
 
 
 ```
@@ -200,6 +204,10 @@ Stopping. Best iteration: 30
 
 ```
 Stopping. Best iteration: 32
+```
+
+```
+Stopping. Best iteration: 38
 ```
 
 ```
@@ -214,16 +222,24 @@ No h provided so forecasting forward 24 periods.
 
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-2.png)
 
+```
+No h provided so forecasting forward 24 periods.
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-3.png)
+
+All methods perform quite poorly at the moment, suffering from the difficulty the default settings have in dealing with non-stationary data (see below).
+
 ### Transformations
 
 By default, the data is transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  The value of lambda is chosen by `forecass:BoxCox.lambda`, using the Guerrero method.  Setting the `lambda` parameter to 1 will effectively switch off this transformation
 
 ```
-Stopping. Best iteration: 61
+Stopping. Best iteration: 64
 ```
 
 ```
-Stopping. Best iteration: 35
+Stopping. Best iteration: 38
 ```
 
 ```
@@ -247,7 +263,7 @@ model <- xgbar(AirPassengers, trend_method = "differencing", seas_method = "four
 ```
 
 ```
-Stopping. Best iteration: 25
+Stopping. Best iteration: 24
 ```
 
 ```r
