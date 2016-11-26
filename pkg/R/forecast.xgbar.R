@@ -148,7 +148,7 @@ forecast.xgbar <- function(object,
     mean = y,
     fitted = object$fitted,
     newx = x,
-    method = "xgboost"
+    method = object$method
   )
   class(output) <- "forecast"
   return(output)

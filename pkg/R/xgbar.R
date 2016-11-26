@@ -204,6 +204,13 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   # back transform the modulus power transform:
   fitted <- InvJDMod(fitted, lambda = lambda)
   
+  method <- paste0("xgbar(", maxlag, ", ")
+  if(f == 1 | seas_method == "none"){
+    method <- paste0(method, "'non-seasonal')")
+  } else {
+    method <- paste0(method, "'", seas_method, "')")
+  }
+  
   output <- list(
     y =  untransformedy, # original scale
     y2 = y2, # possibly both transformed and seasonally adjusted
@@ -212,7 +219,8 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     fitted = fitted, # original scale
     maxlag = maxlag,
     seas_method = seas_method,
-    lambda = lambda
+    lambda = lambda,
+    method = method
   )
   if(seas_method == "decompose"){
     output$decomp <- decomp
