@@ -126,7 +126,7 @@ forecast.xgbar <- function(object,
     y <- tmp$y
   }
   
-  # fitted and forecast object, on possibly untransformed and seasonally adjusted scale
+  # fitted and forecast object, on possibly untransformed, undifferenced and seasonally adjusted scale
   y <- ts(y[-(1:length(object$y2))],
           frequency = f,
           start = max(time(object$y)) + 1 / f) 
@@ -138,6 +138,14 @@ forecast.xgbar <- function(object,
       multipliers <- multipliers[1:h]
     }
     y <- y * multipliers
+  }
+  
+  # back transform the differencing
+  if(object$diffs > 0){
+    for(i in 1:object$diffs){
+      y <- ts(cumsum(y)  , start = start(y), frequency = f)
+    }
+    y <- y + JDMod(object$y[length(object$y)], lambda = lambda)
   }
   
   # back transform the modulus power transform:

@@ -8,6 +8,7 @@
 #' @import xgboost
 #' @import forecast
 #' @import stats
+#' @imporFrom tseries kpss.test
 #' @param y A univariate time series.
 #' @param xreg Optionally, a vector or matrix of external regressors, which must have the same number of rows as y.
 #' @param nrounds Maximum number of iterations \code{xgboost} will perform.  If \code{nrounds_method = 'cv'}, 
@@ -28,6 +29,9 @@
 #' The transformation is only applied to \code{y}, not \code{xreg}.
 #' @param seas_method Method for dealing with seasonality.
 #' @param K if \code{seas_method == 'fourier'}, the value of \code{K} passed through to \code{fourier} for order of Fourier series to be generated as seasonal regressor variables.
+#' @param trend_method How should the \code{xgboost} try to deal with trends?  Currently the only options to \code{none} is 
+#' \code{auto.arima}-style \code{differencing}, which is based on successive KPSS tests until there is no significant evidence the
+#' remaining series is non-stationary.
 #' @param ... Additional arguments passed to \code{xgboost}.  Only works if nrounds_method is "cv" or "manual".
 #' @details This is the workhorse function for the \code{forecastxgb} package.
 #' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
@@ -59,18 +63,17 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
                   nfold = ifelse(length(y) > 30, 10, 5), 
                   lambda = BoxCox.lambda(abs(y)), verbose = FALSE, 
                   seas_method = c("dummies", "decompose", "fourier", "none"), 
-                  K = 5, ...){
-  # y <- seaice_ts; nrounds_method = "cv"; seas_method = "dummies" # for dev
+                  K = 5, 
+                  trend_method = c("none", "differencing"), ...){
+  # y <- AirPassengers; nrounds_method = "cv"; seas_method = "fourier"; trend_method = "differencing" # for dev
 
   nrounds_method = match.arg(nrounds_method)
   seas_method = match.arg(seas_method)
+  trend_method = match.arg(trend_method)
   
-  #TODO - implement decomposition
+  #TODO - better implement decomposition
   # maxlags can be much fewer, down to 1, if working with adjusted series
   # if series is < 3*f+1, should force it to use decomposition
-  
-  # TODO - fourier as a third option for seas_method
-  # TODO - "none" as an option for seas_method
   
   # check y is a univariate time series
   if(!"ts" %in% class(y)){
@@ -88,17 +91,33 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
       stop("xreg should be a numeric and able to be coerced to a matrix")
     }
   }
+  f <- stats::frequency(y)
   untransformedy <- y
   origy <- JDMod(y, lambda = lambda)
   
-  # not sure whether transformation should be before or after seasonal adjustment...
+  # de-trend the y if option was asked for
+  # `diffs` is the number of differencing operations done, and is defined even if 
+  # trend_method != "differencing"
+  diffs <- 0
+  if(trend_method == "differencing"){
+    alpha = 0.05
+    dodiff <- TRUE
+    while(dodiff){
+      suppressWarnings(dodiff <- tseries::kpss.test(origy)$p.value < alpha)
+      if(dodiff){
+        diffs <- diffs + 1
+        origy <- ts(c(0, diff(origy)), start = start(origy), frequency = f)
+      }
+    }
+  }
+  
+  # seasonal adjustment if asked for
   if(seas_method == "decompose"){
     decomp <- decompose(origy, type = "multiplicative")
     origy <- seasadj(decomp)
   }
   
 
-  f <- stats::frequency(y)
   if(maxlag < f & seas_method == "dummies"){
     stop("At least one full period of lags needed when seas_method = dummies.")
   }
@@ -144,7 +163,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   # All models get the lagged values of y as regressors:
   x[ , 1:maxlag] <- lagv(origy, maxlag, keeporig = FALSE)
   
-  # All models add a linear time variable for x:
+  # All models add a linear time variable for x, although it seems pretty useless for now:
   x[ , maxlag + 1] <- time(y2)
   
   # Some models get one hot encoding of seasons
@@ -190,7 +209,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
       }
   }  
   if(verbose){message("Fitting xgboost model")}
-  model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose, ...)
+  model <- xgboost(data = x, label = y2, nrounds = nrounds_use, verbose = verbose)
   
   fitted <- ts(c(rep(NA, maxlag), 
                  predict(model, newdata = x)), 
@@ -201,10 +220,20 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     fitted <- fitted * decomp$seasonal
   }
   
+  # back transform the differencing
+  if(trend_method == "differencing"){
+    for(i in 1:diffs){
+      fitted[!is.na(fitted)] <- ts(cumsum(fitted[!is.na(fitted)]), start = start(origy), frequency = f)
+    }
+    fitted <- fitted + JDMod(untransformedy[maxlag + 1], lambda = lambda)
+  }
+  
   # back transform the modulus power transform:
   fitted <- InvJDMod(fitted, lambda = lambda)
   
-  method <- paste0("xgbar(", maxlag, ", ")
+  
+  method <- paste0("xgbar(", maxlag, ", ", diffs, ", ")
+  
   if(f == 1 | seas_method == "none"){
     method <- paste0(method, "'non-seasonal')")
   } else {
@@ -213,12 +242,13 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   
   output <- list(
     y =  untransformedy, # original scale
-    y2 = y2, # possibly both transformed and seasonally adjusted
+    y2 = y2, # possibly all three of transformed, differenced and seasonally adjusted
     x = x,
     model = model,
     fitted = fitted, # original scale
     maxlag = maxlag,
     seas_method = seas_method,
+    diffs = diffs,
     lambda = lambda,
     method = method
   )
