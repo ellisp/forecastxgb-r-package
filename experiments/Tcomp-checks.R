@@ -27,7 +27,7 @@ competition <- function(collection, maxfors = length(collection)){
   nseries <- length(collection)
   mases <- foreach(i = 1:maxfors, .combine = "rbind") %dopar% {
     thedata <- collection[[i]]  
-    mod1 <- xgbar(thedata$x)
+    mod1 <- xgbar(thedata$x, trend_method = "differencing", seas_method = "dummies", lambda = 1)
     fc1 <- forecast(mod1, h = thedata$h)
     fc2 <- thetaf(thedata$x, h = thedata$h)
     fc3 <- forecast(auto.arima(thedata$x), h = thedata$h)
@@ -72,10 +72,10 @@ competition <- function(collection, maxfors = length(collection)){
 
 
 ## Test on a small set of data, useful during dev
-small_collection <- list(tourism[[1]], tourism[[2]], tourism[[3]], tourism[[4]], tourism[[5]], tourism[[6]])
+small_collection <- list(tourism[[100]], tourism[[200]], tourism[[300]], tourism[[400]], tourism[[500]], tourism[[600]])
 class(small_collection) <- "Mcomp"
 test1 <- competition(small_collection)
-
+round(test1, 1)
 
 #========Fit models==============
 system.time(t1  <- competition(subset(tourism, "yearly")))

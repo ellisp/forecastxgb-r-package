@@ -61,9 +61,10 @@
 xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100, 
                   nrounds_method = c("cv", "v", "manual"), 
                   nfold = ifelse(length(y) > 30, 10, 5), 
-                  lambda = BoxCox.lambda(abs(y)), verbose = FALSE, 
+                  lambda = 1, 
+                  verbose = FALSE, 
                   seas_method = c("dummies", "decompose", "fourier", "none"), 
-                  K = 5, 
+                  K =  max(1, min(round(f / 2 - 1), 10)), 
                   trend_method = c("none", "differencing"), ...){
   # y <- AirPassengers; nrounds_method = "cv"; seas_method = "fourier"; trend_method = "differencing" # for dev
 
@@ -154,10 +155,10 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     
   #----------------------------creating x--------------------
   # set up the matrix "x" of lagged versions of y, time series trend, and seasonal treatment:
-  if(seas_method == "dummies"){ncolx <- maxlag + f}
+  if(seas_method == "dummies" & f > 1){ncolx <- maxlag + f}
   if(seas_method == "decompose"){ncolx <- maxlag + 1}
-  if(seas_method == "fourier"){ncolx <- maxlag + 1 + K * 2}
-  if(seas_method == "none"){ncolx <- maxlag + 1}
+  if(seas_method == "fourier" & f > 1){ncolx <- maxlag + 1 + K * 2}
+  if(seas_method == "none" | f == 1){ncolx <- maxlag + 1}
   x <- matrix(0, nrow = n, ncol = ncolx)
   
   # All models get the lagged values of y as regressors:
@@ -256,7 +257,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
     output$decomp <- decomp
   }
   
-  if(seas_method == "fourier"){
+  if(seas_method == "fourier" & f != 1){
     output$fx <- fx
     output$K <- K
   }

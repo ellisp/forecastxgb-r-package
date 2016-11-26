@@ -102,13 +102,15 @@ All methods perform quite poorly at the moment, suffering from the difficulty th
 
 ### Transformations
 
-By default, the data is transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  The value of lambda is chosen by `forecass:BoxCox.lambda`, using the Guerrero method.  Setting the `lambda` parameter to 1 will effectively switch off this transformation
+The data can be transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  Leaving the `lambda` parameter as 1 will effectively switch off this transformation.
 ```{r echo = FALSE}
 model1 <- xgbar(co2, seas_method = "decompose", lambda = 1)
-model2 <- xgbar(co2, seas_method = "decompose")
+model2 <- xgbar(co2, seas_method = "decompose", lambda = BoxCox.lambda(co2))
 plot(forecast(model1), main = "No transformation")
-plot(forecast(model2), main = "With default transformation")
+plot(forecast(model2), main = "With transformation")
 ```
+
+Version 0.0.9 of `forecastxgb` gave `lambda` the default value of `BoxCox.lambda(abs(y))`.  This returned spectacularly bad forecasting results.  Forcing this to be between 0 and 1 helped a little, but still gave very bad results.  So far there isn't evidence (but neither is there enough investigation) that a Box Cox transformation helps xgbar do its model fitting at all.
 
 ### Non-stationarity
 From experiments so far, it seems the basic idea of `xgboost` struggles in this context with extrapolation into a new range of variables not in the training set.  This suggests better results might be obtained by transforming the series into a stationary one before modelling - a similar approach to that taken by `forecast::auto.arima`.  This option is available by `trend_method = "differencing"` and seems to perform well - certainly better than without - and it will probably be made a default setting once more experience is available.

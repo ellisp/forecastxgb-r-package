@@ -7,9 +7,9 @@
 \usage{
 xgbar(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
   nrounds_method = c("cv", "v", "manual"), nfold = ifelse(length(y) > 30,
-  10, 5), lambda = BoxCox.lambda(abs(y)), verbose = FALSE,
-  seas_method = c("dummies", "decompose", "fourier", "none"), K = 5,
-  trend_method = c("none", "differencing"), ...)
+  10, 5), lambda = min(1, max(0, BoxCox.lambda(abs(y)))), verbose = FALSE,
+  seas_method = c("dummies", "decompose", "fourier", "none"), K = max(1,
+  min(round(f/2 - 1), 10)), trend_method = c("none", "differencing"), ...)
 }
 \arguments{
 \item{y}{A univariate time series.}
