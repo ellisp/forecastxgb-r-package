@@ -8,7 +8,7 @@
 xgbar(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 100,
   nrounds_method = c("cv", "v", "manual"), nfold = ifelse(length(y) > 30,
   10, 5), lambda = 1, verbose = FALSE, seas_method = c("dummies",
-  "decompose", "fourier", "none"), K = max(1, min(round(f/2 - 1), 10)),
+  "decompose", "fourier", "none"), K = max(1, min(round(f/4 - 1), 10)),
   trend_method = c("none", "differencing"), ...)
 }
 \arguments{

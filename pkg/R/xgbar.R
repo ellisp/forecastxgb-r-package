@@ -66,7 +66,7 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
                   seas_method = c("dummies", "decompose", "fourier", "none"), 
                   K =  max(1, min(round(f / 4 - 1), 10)), 
                   trend_method = c("none", "differencing"), ...){
-  # y <- AirPassengers; nrounds_method = "cv"; seas_method = "fourier"; trend_method = "differencing" # for dev
+  # y <- AirPassengers; nrounds_method = "cv"; nrounds = 100; seas_method = "fourier"; trend_method = "differencing"; verbose = TRUE; xreg = NULL; maxlag = 8; lambda = 1; K = 1
 
   nrounds_method = match.arg(nrounds_method)
   seas_method = match.arg(seas_method)
@@ -191,10 +191,10 @@ xgbar <- function(y, xreg = NULL, maxlag = max(8, 2 * frequency(y)), nrounds = 1
   if(nrounds_method == "cv"){
     if(verbose){message("Starting cross-validation")}
     cv <- xgb.cv(data = x, label = y2, nrounds = nrounds, nfold = nfold, 
-                 early.stop.round = 5, maximize = FALSE, verbose = verbose, ...)
+                 early_stopping_rounds = 5, maximize = FALSE, verbose = verbose, ...) # should finish with , ...
     # TODO - xgb.cv uses cat() to give messages, very poor practice.  Sink them somewhere if verbose = FALSE?
     
-    nrounds_use <- min(which(cv$test.rmse.mean == min(cv$test.rmse.mean)))
+    nrounds_use <- cv$best_iteration
   } else {if(nrounds_method == "v"){
       nrounds_use <- validate_xgbar(y, xreg = xreg, ...) $best_nrounds
   } else { 

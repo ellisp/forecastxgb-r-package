@@ -1,12 +1,12 @@
 Package: forecastxgb
 Title: Time Series Models and Forecasts using "xgboost"
-Version: 0.1.0.9000
+Version: 0.1.1.9000
 Authors@R: person("Peter", "Ellis", email = "peter.ellis2013nz@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends:
     R (>= 3.1.2),
     forecast,
-    xgboost
+    xgboost (>= 0.6-4)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
