@@ -39,10 +39,6 @@ Usage with default values is straightforward.  Here it is fit to Australian mont
 library(forecastxgb)
 model <- xgbar(gas)
 ```
-
-```
-Stopping. Best iteration: 15
-```
 (Note: the "Stopping. Best iteration..." to the screen is produced by `xgboost::xgb.cv`, which uses `cat()` rather than `message()` to print information on its processing.)
 
 By default, `xgbar` uses row-wise cross-validation to determine the best number of rounds of iterations for the boosting algorithm without overfitting.  A final model is then fit on the full available dataset.  The relative importance of the various features in the model can be inspected by `importance_xgb()` or, more conveniently, the `summary` method for objects of class `xgbar`.
@@ -56,7 +52,7 @@ summary(model)
 ```
 
 Importance of features in the xgboost model:
-    Feature         Gain        Cover   Frequence
+    Feature         Gain        Cover   Frequency
  1:   lag12 5.097936e-01 0.1480752533 0.078475336
  2:   lag11 2.796867e-01 0.0731403763 0.042600897
  3:   lag13 1.043604e-01 0.0355137482 0.031390135
@@ -86,7 +82,7 @@ Importance of features in the xgboost model:
 27: season5 2.863805e-06 0.0022286541 0.006726457
 28: season6 2.628821e-06 0.0021707670 0.002242152
 29: season9 9.226827e-08 0.0003762663 0.002242152
-    Feature         Gain        Cover   Frequence
+    Feature         Gain        Cover   Frequency
 
  35 features considered.
 476 original observations.
@@ -119,39 +115,32 @@ library(fpp)
 consumption <- usconsumption[ ,1]
 income <- matrix(usconsumption[ ,2], dimnames = list(NULL, "Income"))
 consumption_model <- xgbar(y = consumption, xreg = income)
-```
-
-```
-Stopping. Best iteration: 8
-```
-
-```r
 summary(consumption_model)
 ```
 
 ```
 
 Importance of features in the xgboost model:
-        Feature        Gain       Cover   Frequence
- 1:        lag2 0.280707265 0.088010026 0.126086957
- 2:        lag1 0.269531385 0.184653948 0.204347826
- 3: Income_lag0 0.103122728 0.146219190 0.091304348
- 4: Income_lag1 0.051318189 0.074223646 0.043478261
- 5:        lag8 0.042695148 0.107227406 0.052173913
- 6:        lag3 0.039635713 0.072970338 0.069565217
- 7:        lag6 0.035046542 0.059462470 0.047826087
- 8: Income_lag8 0.033260720 0.032168222 0.034782609
- 9: Income_lag6 0.028728175 0.012672330 0.030434783
-10:        lag7 0.019318548 0.050132294 0.043478261
-11:        lag4 0.018150376 0.028129787 0.065217391
-12: Income_lag2 0.017464400 0.035788887 0.047826087
-13: Income_lag5 0.016736308 0.039270297 0.034782609
-14:        lag5 0.014711913 0.017685559 0.030434783
-15: Income_lag3 0.012430195 0.019078123 0.026086957
-16: Income_lag4 0.010153752 0.018521097 0.034782609
-17:     season4 0.004981051 0.002506615 0.004347826
-18:     season3 0.001350750 0.010026459 0.008695652
-19: Income_lag7 0.000656844 0.001253307 0.004347826
+        Feature        Gain       Cover   Frequency
+ 1:        lag2 0.253763903 0.082908446 0.124513619
+ 2:        lag1 0.219332682 0.114608734 0.171206226
+ 3: Income_lag0 0.115604367 0.183107958 0.085603113
+ 4:        lag3 0.064652150 0.093105742 0.089494163
+ 5:        lag8 0.055645114 0.099756152 0.066147860
+ 6: Income_lag8 0.050460959 0.049434715 0.050583658
+ 7: Income_lag1 0.047187235 0.088561295 0.050583658
+ 8: Income_lag6 0.040512834 0.029150964 0.050583658
+ 9:        lag6 0.031876878 0.044225227 0.054474708
+10: Income_lag2 0.020355402 0.015739304 0.031128405
+11: Income_lag5 0.018011250 0.036577256 0.035019455
+12:        lag5 0.017930780 0.032143649 0.035019455
+13:        lag7 0.016674036 0.034249612 0.027237354
+14: Income_lag4 0.015952784 0.025714919 0.038910506
+15: Income_lag7 0.009850701 0.021724673 0.019455253
+16:        lag4 0.008819146 0.028929284 0.038910506
+17: Income_lag3 0.008720737 0.013855021 0.019455253
+18:     season4 0.003152234 0.001551762 0.003891051
+19:     season3 0.001496807 0.004655287 0.007782101
 
  20 features considered.
 164 original observations.
@@ -165,13 +154,6 @@ The challenge of using external regressors in a forecasting environment is that 
 ```r
 income_future <- matrix(forecast(xgbar(usconsumption[,2]), h = 10)$mean, 
                         dimnames = list(NULL, "Income"))
-```
-
-```
-Stopping. Best iteration: 1
-```
-
-```r
 plot(forecast(consumption_model, xreg = income_future))
 ```
 
@@ -187,18 +169,6 @@ Currently there are three methods of treating seasonality.
 - An alternative is to perform classic multiplicative seasonal adjustment on the series before feeding it to `xgboost`.   This seems to work better.
 - A third option is to create a set of pairs of Fourier transform variables and use them as x regressors
 
-
-```
-Stopping. Best iteration: 49
-```
-
-```
-Stopping. Best iteration: 63
-```
-
-```
-Stopping. Best iteration: 65
-```
 
 ```
 No h provided so forecasting forward 24 periods.
@@ -225,14 +195,6 @@ All methods perform quite poorly at the moment, suffering from the difficulty th
 The data can be transformed by a modulus power transformation (as per John and Draper, 1980) before feeding to `xgboost`.  This transformation is similar to a Box-Cox transformation, but works with negative data.  Leaving the `lambda` parameter as 1 will effectively switch off this transformation.
 
 ```
-Stopping. Best iteration: 61
-```
-
-```
-Stopping. Best iteration: 35
-```
-
-```
 No h provided so forecasting forward 24 periods.
 ```
 
@@ -252,13 +214,6 @@ From experiments so far, it seems the basic idea of `xgboost` struggles in this 
 
 ```r
 model <- xgbar(AirPassengers, trend_method = "differencing", seas_method = "fourier")
-```
-
-```
-Stopping. Best iteration: 44
-```
-
-```r
 plot(forecast(model, 24))
 ```
 

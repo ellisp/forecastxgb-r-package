@@ -44,4 +44,3 @@ M3 Forecasting Competition data") +
 Peter Ellis
 }
 \keyword{datasets}
-

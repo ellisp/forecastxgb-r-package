@@ -76,9 +76,6 @@ consumption_model <- xgbar(y = consumption, xreg = income)
 summary(consumption_model)
 }
 }
-\author{
-Peter Ellis
-}
 \references{
 J. A. John and N. R. Draper (1980), "An Alternative Family of Transformations", \emph{Journal of the Royal Statistical
 Society}.
@@ -87,4 +84,6 @@ Society}.
 \code{\link{summary.xgbar}}, \code{\link{plot.xgbar}}, \code{\link{forecast.xgbar}}, \code{\link{xgbar_importance}},
 \code{\link[xgboost]{xgboost}}.
 }
-
+\author{
+Peter Ellis
+}

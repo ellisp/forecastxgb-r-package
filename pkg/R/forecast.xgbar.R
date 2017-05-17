@@ -117,6 +117,7 @@ forecast.xgbar <- function(object,
   
   x <- object$x
   y <- object$y2
+  
 
   for(i in 1:h){
     tmp <- forward1(x, y, model = object$model, xregpred = xreg3[i, ], i = i)  
@@ -124,6 +125,7 @@ forecast.xgbar <- function(object,
     y <- tmp$y
   }
   
+    
   # fitted and forecast object, on possibly untransformed, undifferenced and seasonally adjusted scale
   y <- ts(y[-(1:length(object$y2))],
           frequency = f,
@@ -139,11 +141,11 @@ forecast.xgbar <- function(object,
   
   # back transform the seasonal adjustment:
   if(seas_method == "decompose"){
-    multipliers <- tail(object$decomp$seasonal, f)
+    multipliers <- utils::tail(object$decomp$seasonal, f)
     if(h < f){
       multipliers <- multipliers[1:h]
     }
-    y <- y * multipliers
+    y <- y * as.vector(multipliers)
   }
   
   # back transform the modulus power transform:

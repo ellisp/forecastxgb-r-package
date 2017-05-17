@@ -18,4 +18,3 @@ Extent in millions of square kilometres of sea ice in the Arctic from 21 August 
 plot(seaice_ts)
 }
 \keyword{datasets}
-

@@ -18,10 +18,9 @@ plot method for an object created by xgbar
 model <- xgbar(AirPassengers)
 plot(model)
 }
-\author{
-Peter Ellis
-}
 \seealso{
 \code{\link{xgbar}}
 }
-
+\author{
+Peter Ellis
+}

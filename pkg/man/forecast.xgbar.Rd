@@ -30,10 +30,9 @@ summary(gas_model)
 gas_fc <- forecast(gas_model, h = 12)
 plot(gas_fc)
 }
-\author{
-Peter Ellis
-}
 \seealso{
 \code{\link{xgbar}}, \code{\link[forecast]{forecast}}
 }
-
+\author{
+Peter Ellis
+}

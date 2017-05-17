@@ -42,4 +42,3 @@ ggplot(Tcomp_results, aes(x = model, y =  MASE, colour = Frequency, label = mode
 Peter Ellis
 }
 \keyword{datasets}
-

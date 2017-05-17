@@ -14,4 +14,7 @@ with the convenient handling of time series and familiar API of Rob Hyndman's \c
 It applies to time series the Extreme Gradient Boosting proposed in \emph{Greedy Function Approximation: A 
 Gradient Boosting Machine, by Jermoe Friedman in 2001} (http://www.jstor.org/stable/2699986).
 }
+\author{
+\strong{Maintainer}: Peter Ellis \email{peter.ellis2013nz@gmail.com}
 
+}
