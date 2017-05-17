@@ -18,6 +18,7 @@ test_that("Modulus transform works with negative and zero data", {
 })
 
 test_that("Modulus transform works when lambda = 1 or 0",{
+  y <- ts(round(rnorm(100), 1))
   expect_equal(y, JDMod(y, lambda = 1))
   expect_equal(log(AirPassengers + 1), JDMod(AirPassengers, lambda = 0))
   
