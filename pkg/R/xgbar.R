@@ -37,7 +37,38 @@
 #' It fits a model to a time series.  Under the hood, it creates a matrix of explanatory variables 
 #' based on lagged versions of the response time series, and (optionally) dummy variables (simple hot one encoding, or Fourier transforms) for seasons.  That 
 #' matrix is then fed as the feature set for \code{xgboost} to do its stuff.
-#' @return An object of class \code{xgbar}.
+#' @return An object of class \code{xgbar}.  These have a \code{forecast} method and are generally 
+#' expected to be used in a way such as \code{forecast(my_xgbar_model, h = 24)}.  But the \code{xgbar}
+#' object itself can be of use in model checking and diagnosis.  It is list with the following elements:
+#' \describe{
+#' \item{\code{y}}{The original value of \code{y} fed to \code{xgbar}}
+#' \item{\code{y2}}{\code{y} except for its first \code{maxlag} values. }
+#' \item{\code{x}}{The features used by \code{xgboost} to model \code{y2}.  \code{x} is basically 
+#' a matrix of numbers created by the automated feature generation of \code{xgbar}, in particular 
+#' the differencing (if asked for), seasonal adjustment (if asked for), and creation of lagged 
+#' values.  If \code{y} is univariate,
+#' \code{x} will be just the lagged values of \code{y} and will have \code{length(y) - maxlag} rows
+#' and \code{maxlag} columns.  If \code{xreg} was supplied, \code{x} will have \code{maxlag * (ncol(xreg) + 1)}
+#' columns - a set of columns for the lagged values of y, and a set of columns for each lagged value
+#' of the xreg matrix.}
+#' \item{\code{model}}{Object of class \code{xgb.Booster} returned by \code{xgboost}.  The actual 
+#' xgboost model that regressed \code{y2} on \code{x}.}
+#' \item{\code{fitted}}{Fitted values of \code{y}.  The first \code{maxlag} values will be \code{NA}.
+#' The remainder are the predicted values of the xgboost regression of \code{y2} on \code{x}.}
+#' \item{\code{maxlag}}{The original user-supplied value of \code{maxlag}, stored for future use by 
+#' \code{forecast.xgbar}.}
+#' \item{\code{seas_method}}{The original user-supplied value of \code{seas_method}, stored for future use by 
+#' \code{forecast.xgbar}.}
+#' \item{\code{diffs}}{The number of rounds of differencing applied to y to make it stationary, if 
+#' \code{trend_method = "differencing"} was used.}
+#' \item{\code{lambda}}{The original user-supplied value of \code{lambda} for modulus transformation, 
+#' stored for future use by \code{forecast.xgbar}.}
+#' \item{\code{method}}{A character string summarising the key arguments to xgbar, of the structure 
+#' \code{xgbar(maxlag, diffs, seas_method)}.}
+#' \item{\code{decomp}}{If \code{seas_method = "decompose"} was used, this will be a list of the output 
+#' from \code{decompose}, which decomposes y (called \code{x} by \code{decompose}) into seasonal, trend 
+#' and random components.}
+#' }
 #' @seealso \code{\link{summary.xgbar}}, \code{\link{plot.xgbar}}, \code{\link{forecast.xgbar}}, \code{\link{xgbar_importance}},
 #' \code{\link[xgboost]{xgboost}}.
 #' @author Peter Ellis
