@@ -77,6 +77,10 @@ The remainder are the predicted values of the xgboost regression of \code{y2} on
 stored for future use by \code{forecast.xgbar}.}
 \item{\code{method}}{A character string summarising the key arguments to xgbar, of the structure 
 \code{xgbar(maxlag, diffs, seas_method)}.}
+\item{\code{origxreg}}{The original user-supplied value of \code{origxreg}, 
+stored for future use by \code{forecast.xgbar} (needed to create future values of lagged \code{xreg}
+for the forecast period) .}
+\item{code{ncolxreg}}{The number of columns in the original \code{xreg} matrix.}
 \item{\code{decomp}}{If \code{seas_method = "decompose"} was used, this will be a list of the output 
 from \code{decompose}, which decomposes y (called \code{x} by \code{decompose}) into seasonal, trend 
 and random components.}
